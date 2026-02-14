@@ -1,0 +1,42 @@
+@import 'tailwindcss';
+
+/* Scan Sources */
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+/* Theme Customization */
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Brand Colors */
+    --color-primary: #FF4445;
+    --color-primary-dark: #E63535;
+    --color-dark: #111111;
+    --color-light-gray: #FBFBFB;
+    --color-input-border: #D1D5DB;
+    --color-text-gray: #6B7280;
+}
+
+/* Reusable Components */
+@layer components {
+
+    .auth-input {
+        @apply w-full px-4 py-3 rounded-lg border border-gray-300 
+               focus:ring-2 focus:ring-[var(--color-primary)] 
+               focus:outline-none transition;
+    }
+
+    .auth-button {
+        @apply w-full py-3 rounded-full font-semibold text-white
+               bg-[var(--color-primary)]
+               hover:bg-[var(--color-primary-dark)]
+               transition duration-200;
+    }
+
+    .auth-link {
+        @apply text-[var(--color-primary)] hover:underline;
+    }
+}
