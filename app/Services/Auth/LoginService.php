@@ -31,6 +31,18 @@ class LoginService
             ]);
         }
 
+        if ($user->role === 'staff' && !$user->is_approved) {
+            throw ValidationException::withMessages([
+                'email' => 'Your account is pending admin approval. You will be notified once approved.',
+            ]);
+        }
+
+        if ($user->is_blocked) {
+            throw ValidationException::withMessages([
+                'email' => 'Your account has been blocked. Please contact an administrator.',
+            ]);
+        }
+
         // 3️⃣ Attempt authentication
         if (!Auth::attempt([
             'email' => $data['email'],
@@ -71,9 +83,22 @@ class LoginService
 
         $user = $this->loginRepository->findByEmail($data['email']);
 
-        // Use !Hash::check() to throw if password is WRONG
         if (!$user || !Hash::check($data['password'], $user->password)) {
-            throw new \Exception('Invalid credentials');
+            throw ValidationException::withMessages([
+                'email' => 'Invalid credentials.',
+            ]);
+        }
+
+        if ($user->role === 'staff' && $user->isPending()) {
+            throw ValidationException::withMessages([
+                'email' => 'Your account is pending admin approval. You will be notified once approved.',
+            ]);
+        }
+
+        if ($user->isBlocked()) {
+            throw ValidationException::withMessages([
+                'email' => 'Your account has been blocked. Please contact an administrator.',
+            ]);
         }
 
         return $user;

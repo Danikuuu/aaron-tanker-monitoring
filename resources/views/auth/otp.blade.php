@@ -5,6 +5,15 @@
 <div class="text-center mb-8">
     <img src="{{ asset('images/logo.png') }}" class="mx-auto h-16 mb-4">
 </div>
+@if ($errors->any())
+    <div class="text-red-500">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
 <div class="text-center mb-6">
     <div class="mx-auto w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-4">

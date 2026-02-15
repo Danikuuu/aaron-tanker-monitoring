@@ -6,6 +6,10 @@
     <img src="{{ asset('images/AARON.png') }}" class="mx-auto mb-4 mix-blend-">
 </div>
 
+        @error('email')
+            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+        @enderror
+
 <form method="POST" action="{{ route('login.attempt') }}" class="space-y-5">
     @csrf
 

@@ -2,98 +2,89 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\OtpMail;
 use App\Requests\LoginRequest;
 use App\Requests\OTPRequest;
 use App\Services\Auth\LoginService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Services\Auth\OtpService;
+use App\Mail\OtpMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
     protected LoginService $loginService;
+    protected OtpService $otpService;
 
-    public function __construct(LoginService $loginService)
+    public function __construct(LoginService $loginService, OtpService $otpService)
     {
         $this->loginService = $loginService;
+        $this->otpService = $otpService;
     }
 
+    /**
+     * Handle login request
+     */
     public function store(LoginRequest $request)
     {
-        $data = $request->validated();
-
         try {
-            // 1. Verify credentials manually, but do NOT log in
-            $user = $this->loginService->checkCredentials($data);
+            $user = $this->loginService->checkCredentials($request->validated());
 
-            // 2. Generate OTP
-            // $otp = rand(100000, 999999);
-            $otp = 1234; // for testing, use a fixed OTP. In production, use random OTP.
-
-            // 3. Store user ID and OTP in session (or database if you want persistence)
-            session([
-                'login_user_id' => $user->id,
-                'login_otp' => $otp,
-                'login_otp_expires' => now()->addMinutes(5), // optional expiration
+            $otp = $this->otpService->generate('login', [
+                'user_id' => $user->id,
             ]);
 
-            // 4. Send OTP via email
             Mail::to($user->email)->send(new OtpMail($otp));
 
-            // 5. Redirect to OTP page
-            return redirect()->route('otp');
+            return redirect()->route('otp')->with('success', 'OTP sent to your email.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // ✅ Preserves specific messages like "pending approval"
+            return back()->withErrors($e->errors())->withInput();
 
         } catch (\Exception $e) {
-            return back()->withErrors(['email' => 'Invalid credentials.'])->withInput();
+            // Generic fallback for unexpected errors
+            return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
         }
     }
 
+    /**
+     * Verify login OTP
+     */
     public function verifyOtp(OTPRequest $request)
     {
-        $userId = session('login_user_id');
-        $otp = session('login_otp');
-        $expires = session('login_otp_expires');
+        $enteredOtp = implode('', $request->otp); // 4 input boxes
 
-        if (!$userId || !$otp || !$expires || now()->greaterThan($expires)) {
-            return redirect()->route('login')
-                ->withErrors(['email' => 'Session expired. Please login again.']);
-        }
+        try {
+            $payload = $this->otpService->verify('login', $enteredOtp);
 
-        $enteredOtp = implode('', $request->otp); // if OTP is split in 4 boxes
+            $user = $this->loginService->loginById($payload['user_id']);
 
-        if ((string) $enteredOtp !== (string) $otp) {
-            return back()->withErrors(['otp' => 'Invalid OTP']);
-        }
+            // Redirect based on role
+            if ($user->role === 'staff') {
+                return redirect()->route('staff.fuel-supply');
+            } elseif ($user->role === 'admin') {
+                return redirect()->route('admin.overview');
+            }
 
-        $user = $this->loginService->loginById($userId); // make sure it returns the User model
-
-        // STORE ROLE IN SESSION
-        session([
-            'role' => $user->role, // <-- store role here
-            'login_user_id' => $user->id, // optional, if needed elsewhere
-        ]);
-
-        // Clear OTP session
-        session()->forget(['login_otp', 'login_otp_expires']);
-
-        if ($user->role === 'staff') {
-            return redirect()->route('staff.fuel-supply');
-        } else if ($user->role === 'admin') {
-            return redirect()->route('admin.overview');
-        } else {
             Auth::logout();
-            return redirect()->route('login')
-                ->withErrors(['email' => 'Unauthorized role.']);
+            abort(403, 'Unauthorized role');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors());
+        } catch (\Exception $e) {
+            return back()->withErrors(['otp' => $e->getMessage()]);
         }
     }
 
-    public function destroy(Request $request)
+    /**
+     * Logout
+     */
+    public function destroy()
     {
         Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        session()->invalidate();
+        session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('login');
     }
 }
