@@ -1,55 +1,232 @@
-<!-- resources/views/admin/analytics.blade.php -->
 @extends('admin.layout.app')
 
 @section('title', 'Analytics')
 
 @section('content')
 <div class="space-y-8">
-    <!-- Monthly Fuel Tanker Arrival -->
+
+    {{-- Filter Bar --}}
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold">Analytics</h1>
+        <form method="GET" action="{{ route('admin.analytics') }}" class="flex items-center gap-3">
+            <label class="text-sm font-medium text-gray-600">Time Range:</label>
+            <select name="months" onchange="this.form.submit()"
+                    class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5757]">
+                <option value="3"  {{ $months == 3  ? 'selected' : '' }}>Last 3 Months</option>
+                <option value="6"  {{ $months == 6  ? 'selected' : '' }}>Last 6 Months</option>
+                <option value="12" {{ $months == 12 ? 'selected' : '' }}>Last 12 Months</option>
+            </select>
+        </form>
+    </div>
+
+    {{-- Summary Cards --}}
+    <div class="grid grid-cols-4 gap-4">
+        @foreach(['diesel' => ['label' => 'Diesel Arrived', 'color' => 'text-green-600'],
+                  'premium'  => ['label' => 'Premium Arrived',  'color' => 'text-yellow-600'],
+                  'unleaded' => ['label' => 'Unleaded Arrived', 'color' => 'text-blue-600'],
+                  'methanol' => ['label' => 'Methanol Arrived', 'color' => 'text-purple-600']] as $type => $cfg)
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+            <p class="text-sm text-gray-500 mb-1">{{ $cfg['label'] }}</p>
+            <p class="text-2xl font-bold {{ $cfg['color'] }}">
+                {{ number_format($arrivalTotals[$type] ?? 0, 2) }} L
+            </p>
+        </div>
+        @endforeach
+    </div>
+
+    <div class="grid grid-cols-4 gap-4">
+        @foreach(['diesel' => ['label' => 'Diesel Dispatched', 'color' => 'text-green-600'],
+                  'premium'  => ['label' => 'Premium Dispatched',  'color' => 'text-yellow-600'],
+                  'unleaded' => ['label' => 'Unleaded Dispatched', 'color' => 'text-blue-600'],
+                  'methanol' => ['label' => 'Methanol Used (Mix)', 'color' => 'text-purple-600']] as $type => $cfg)
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+            <p class="text-sm text-gray-500 mb-1">{{ $cfg['label'] }}</p>
+            <p class="text-2xl font-bold {{ $cfg['color'] }}">
+                @if($type === 'methanol')
+                    {{ number_format($departureTotals->sum('total_methanol'), 2) }} L
+                @else
+                    {{ number_format($departureTotals[$type]->total ?? 0, 2) }} L
+                @endif
+            </p>
+        </div>
+        @endforeach
+    </div>
+
+    {{-- Arrival Chart --}}
     <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-semibold mb-6">Monthly fuel tanker arrival</h2>
-        <div class="bg-gray-50 rounded-lg p-6 h-96">
-            <!-- Chart placeholder -->
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold">Monthly Fuel Tanker Arrival</h2>
+            <a href="{{ route('admin.analytics.export', ['type' => 'arrival', 'months' => $months]) }}"
+               class="bg-[#FF5757] text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Export CSV
+            </a>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-4" style="height: 380px;">
             <canvas id="arrivalChart"></canvas>
         </div>
-        <div class="flex justify-end gap-3 mt-4">
-            <button class="bg-[#FF5757] text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                </svg>
-                Filter
-            </button>
-            <button class="bg-[#FF5757] text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition">
-                Export
-            </button>
-        </div>
     </div>
 
-    <!-- Monthly Fuel Tanker Departure -->
+    {{-- Departure Chart --}}
     <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-semibold mb-6">Monthly fuel tanker departure</h2>
-        <div class="bg-gray-50 rounded-lg p-6 h-96">
-            <!-- Chart placeholder -->
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold">Monthly Fuel Tanker Departure</h2>
+            <a href="{{ route('admin.analytics.export', ['type' => 'departure', 'months' => $months]) }}"
+               class="bg-[#FF5757] text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Export CSV
+            </a>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-4" style="height: 380px;">
             <canvas id="departureChart"></canvas>
         </div>
-        <div class="flex justify-end gap-3 mt-4">
-            <button class="bg-[#FF5757] text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                </svg>
-                Filter
-            </button>
-            <button class="bg-[#FF5757] text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition">
-                Export
-            </button>
+    </div>
+
+    {{-- Methanol Breakdown Chart --}}
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-6">Methanol Mixture Breakdown (Departures)</h2>
+        <div class="grid grid-cols-2 gap-6">
+            <div class="bg-gray-50 rounded-lg p-4" style="height: 300px;">
+                <canvas id="methanolPieChart"></canvas>
+            </div>
+            <div class="space-y-3 flex flex-col justify-center">
+                @foreach(['diesel', 'premium', 'unleaded'] as $fuel)
+                @php
+                    $row        = $departureTotals[$fuel] ?? null;
+                    $total      = $row ? (float)$row->total : 0;
+                    $methanol   = $row ? (float)$row->total_methanol : 0;
+                    $pure       = $total - $methanol;
+                    $pct        = $total > 0 ? round($methanol / $total * 100, 1) : 0;
+                @endphp
+                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-semibold capitalize
+                            {{ $fuel === 'diesel' ? 'text-green-700' :
+                               ($fuel === 'premium' ? 'text-yellow-700' : 'text-blue-700') }}">
+                            {{ ucfirst($fuel) }}
+                        </span>
+                        <span class="text-sm text-gray-500">{{ number_format($total, 2) }} L total</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                        <div class="h-3 rounded-full
+                            {{ $fuel === 'diesel' ? 'bg-green-500' :
+                               ($fuel === 'premium' ? 'bg-yellow-500' : 'bg-blue-500') }}"
+                             style="width: {{ 100 - $pct }}%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>Pure: {{ number_format($pure, 2) }} L</span>
+                        <span>Methanol: {{ number_format($methanol, 2) }} L ({{ $pct }}%)</span>
+                    </div>
+                </div>
+                @endforeach
+            </div>
         </div>
     </div>
+
 </div>
 
-@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Add your Chart.js implementation here
+    const arrivalRaw   = @json($arrivalData);
+    const departureRaw = @json($departureData);
+    const fuelTypes    = ['diesel', 'premium', 'unleaded', 'methanol'];
+    const fuelColors   = {
+        diesel:   '#22c55e',
+        premium:  '#eab308',
+        unleaded: '#3b82f6',
+        methanol: '#a855f7',
+    };
+
+    function buildDatasets(raw) {
+        const months = Object.keys(raw).sort();
+        return {
+            months,
+            datasets: fuelTypes.map(fuel => ({
+                label:           fuel.charAt(0).toUpperCase() + fuel.slice(1),
+                data:            months.map(m => {
+                    const row = raw[m]?.find(r => r.fuel_type === fuel);
+                    return row ? parseFloat(row.total) : 0;
+                }),
+                backgroundColor: fuelColors[fuel],
+                borderRadius:    4,
+            }))
+        };
+    }
+
+    function makeChart(id, raw) {
+        const { months, datasets } = buildDatasets(raw);
+        new Chart(document.getElementById(id), {
+            type: 'bar',
+            data: { labels: months, datasets },
+            options: {
+                responsive:          true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()} L`
+                        }
+                    }
+                },
+                scales: {
+                    x: { stacked: false },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: v => v.toLocaleString() + ' L' }
+                    }
+                }
+            }
+        });
+    }
+
+    makeChart('arrivalChart',   arrivalRaw);
+    makeChart('departureChart', departureRaw);
+
+    // Methanol pie chart
+    const departureTotals = @json($departureTotals);
+    const mixedFuels      = ['diesel', 'premium', 'unleaded'];
+    const pieLabels       = [];
+    const pieData         = [];
+    const pieColors       = [];
+
+    mixedFuels.forEach(fuel => {
+        const row = departureTotals[fuel];
+        if (row && parseFloat(row.total_methanol) > 0) {
+            pieLabels.push(fuel.charAt(0).toUpperCase() + fuel.slice(1) + ' (Pure)');
+            pieData.push(parseFloat(row.total_pure ?? (row.total - row.total_methanol)));
+            pieColors.push(fuelColors[fuel]);
+
+            pieLabels.push(fuel.charAt(0).toUpperCase() + fuel.slice(1) + ' (Methanol)');
+            pieData.push(parseFloat(row.total_methanol));
+            pieColors.push(fuelColors[fuel] + '80'); // semi-transparent
+        }
+    });
+
+    new Chart(document.getElementById('methanolPieChart'), {
+        type: 'doughnut',
+        data: {
+            labels:   pieLabels,
+            datasets: [{ data: pieData, backgroundColor: pieColors, borderWidth: 2 }]
+        },
+        options: {
+            responsive:          true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ` ${ctx.parsed.toLocaleString()} L`
+                    }
+                }
+            }
+        }
+    });
 </script>
-@endpush
 @endsection

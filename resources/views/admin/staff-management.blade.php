@@ -24,7 +24,7 @@
         <table class="w-full">
             <thead>
                 <tr class="bg-[#FF5757] text-white">
-                    <th class="px-4 py-3 text-left rounded-tl-lg">ID</th>
+                    <!-- <th class="px-4 py-3 text-left rounded-tl-lg">ID</th> -->
                     <th class="px-4 py-3 text-left">Full Name</th>
                     <th class="px-4 py-3 text-left">Email Address</th>
                     <th class="px-4 py-3 text-left">Registered</th>
@@ -35,7 +35,7 @@
             <tbody class="bg-gray-50">
                 @forelse($staff as $member)
                 <tr class="border-b border-gray-200 hover:bg-gray-100 transition">
-                    <td class="px-4 py-3 text-gray-500 text-sm">{{ $member->id }}</td>
+                    <!-- <td class="px-4 py-3 text-gray-500 text-sm">{{ $member->id }}</td> -->
                     <td class="px-4 py-3 font-medium">
                         {{ $member->first_name }} {{ $member->last_name }}
                     </td>

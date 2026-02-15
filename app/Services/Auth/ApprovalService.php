@@ -6,6 +6,7 @@ use App\Mail\StaffApproved;
 use App\Mail\StaffBlocked;
 use App\Mail\StaffDeleted;
 use App\Mail\StaffUnBlocked;
+use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
@@ -29,6 +30,7 @@ class ApprovalService
         ]);
 
         Mail::to($staff->email)->send(new StaffApproved($staff));
+        AuditLog::record('staff_approved', "Admin approved staff: {$staff->email}", $staff);
 
         return $staff->fresh();
     }
@@ -46,6 +48,7 @@ class ApprovalService
         $staff->update(['status' => 'blocked']);
 
         Mail::to($staff->email)->send(new StaffBlocked($staff));
+        AuditLog::record('staff_blocked', "Admin blocked staff: {$staff->email}", $staff);
 
         return $staff->fresh();
     }
@@ -67,6 +70,7 @@ class ApprovalService
         ]);
 
         Mail::to($staff->email)->send(new StaffUnblocked($staff));
+        AuditLog::record('staff_unblocked', "Admin unblocked staff: {$staff->email}", $staff);
 
         return $staff->fresh();
     }
@@ -83,6 +87,7 @@ class ApprovalService
 
         // Send email before deleting so the record still exists
         Mail::to($staff->email)->send(new StaffDeleted($staff));
+        AuditLog::record('staff_deleted', "Admin deleted staff: {$staff->email}");
 
         $staff->delete();
     }

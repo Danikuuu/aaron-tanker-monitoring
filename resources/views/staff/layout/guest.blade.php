@@ -22,8 +22,8 @@
 
             <!-- Navigation -->
             <nav class="flex items-center gap-6">
-                <a href="#" class="hover:text-gray-200 transition">Home</a>
-                <a href="#" class="hover:text-gray-200 transition">Tanker/In</a>
+                <a href="{{ route('staff.fuel-supply') }}" class="hover:text-gray-200 transition">Home</a>
+                <a href="{{ route('staff.tanker-in') }}" class="hover:text-gray-200 transition">Tanker/In</a>
 
                 <!-- Dropdown example -->
                 <div class="relative group">

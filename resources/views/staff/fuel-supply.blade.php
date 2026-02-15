@@ -4,10 +4,10 @@
 @section('title', 'Fuel Supply In/Out')
 
 @section('content')
-<div class="min-h-screen" style="background-image: url('/images/gas-station-bg.jpg'); background-size: cover; background-position: center;">
+<div class="min-h-screen" style="background-image: url('/images/img.png'); background-size: cover; background-position: center;">
     <div class="min-h-screen bg-black/50 backdrop-blur-sm">
         <!-- Header -->
-        <header class="bg-[#FF5757] rounded-full mx-8 mt-8 px-8 py-4">
+        <!-- <header class="bg-[#FF5757] rounded-full mx-8 mt-8 px-8 py-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-12 h-12 bg-black rounded-full flex items-center justify-center">
@@ -27,7 +27,7 @@
                     </div>
                 </nav>
             </div>
-        </header>
+        </header> -->
 
         <!-- Main Content -->
         <div class="flex items-center justify-center px-8 py-16">

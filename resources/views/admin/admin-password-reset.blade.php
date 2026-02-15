@@ -35,7 +35,7 @@
             <p class="text-gray-600">Enter your email to reset your password.</p>
         </div>
 
-        <form method="POST" action="{{ route('password.email') }}">
+        <form method="POST" action="{{ route('admin.password.email') }}">
             @csrf
             <div class="mb-6">
                 <label class="block text-sm font-medium mb-2">
