@@ -24,20 +24,8 @@
             <nav class="flex items-center gap-6">
                 <a href="{{ route('staff.fuel-supply') }}" class="hover:text-gray-200 transition">Home</a>
                 <a href="{{ route('staff.tanker-in') }}" class="hover:text-gray-200 transition">Tanker/In</a>
+                <a href="{{ route('staff.tanker-out') }}" class="hover:text-gray-200 transition">Tanker/Out</a>
 
-                <!-- Dropdown example -->
-                <div class="relative group">
-                    <button class="flex items-center gap-1 hover:text-gray-200 transition">
-                        Tanker/Out
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-                    <div class="absolute hidden group-hover:block mt-2 bg-white text-black rounded-md shadow-lg w-40">
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Option 1</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Option 2</a>
-                    </div>
-                </div>
 
                 <div class="p-4">
                     <form action="{{ route('logout') }}" method="POST">
@@ -46,7 +34,7 @@
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                             </svg>
-                            <span class="text-lg">Logout</span>
+                            <span class="text-md">Logout</span>
                         </button>
                     </form>
                 </div>

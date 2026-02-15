@@ -1,7 +1,7 @@
 <!-- resources/views/staff/tanker-departure.blade.php -->
 @extends('staff.layout.guest')
 
-@section('title', 'Fuel Supply Out')
+@section('title', 'Fuel Supply In')
 
 @section('content')
 <div class="min-h-screen" style="background-image: url('/images/img.png'); background-size: cover; background-position: center;">
@@ -26,10 +26,25 @@
                             </div>
                         </div>
                     </div>
-                    <h2 class="text-2xl font-bold">Fuel Supply Out</h2>
+                    <h2 class="text-2xl font-bold">Fuel Supply In</h2>
                 </div>
+                @if(session('success'))
+                    <div id="flashMessage"
+                        class="mt-4 mb-4 px-4 py-3 rounded-lg bg-green-100 border border-green-300 text-green-800 transition-opacity duration-500">
+                        {{ session('success') }}
+                    </div>
 
-                <form method="POST" action="" class="space-y-4" id="fuelForm">
+                    <script>
+                        setTimeout(() => {
+                            const msg = document.getElementById('flashMessage');
+                            if (msg) {
+                                msg.style.opacity = '0';
+                                setTimeout(() => msg.remove(), 500);
+                            }
+                        }, 3000);
+                    </script>
+                @endif
+                <form method="POST" action="{{ route('tanker-arrival.store') }}" class="space-y-4" id="fuelForm">
                     @csrf
 
                     {{-- Tanker + Driver + Date --}}
@@ -50,7 +65,7 @@
                         </div>
                         <div class="col-span-2">
                             <label class="block text-sm font-medium mb-2">
-                                Departure Date<span class="text-[#FF5757]">*</span>
+                                Arrival Date<span class="text-[#FF5757]">*</span>
                             </label>
                             <input type="date" name="departure_date" required value="{{ date('Y-m-d') }}"
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5757]">

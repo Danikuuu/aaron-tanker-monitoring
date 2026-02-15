@@ -29,7 +29,24 @@
                     <h2 class="text-2xl font-bold">Fuel Supply Out</h2>
                 </div>
 
-                <form method="POST" action="" class="space-y-4" id="fuelForm">
+                @if(session('success'))
+                    <div id="flashMessage"
+                        class="mt-4 mb-4 px-4 py-3 rounded-lg bg-green-100 border border-green-300 text-green-800 transition-opacity duration-500">
+                        {{ session('success') }}
+                    </div>
+
+                    <script>
+                        setTimeout(() => {
+                            const msg = document.getElementById('flashMessage');
+                            if (msg) {
+                                msg.style.opacity = '0';
+                                setTimeout(() => msg.remove(), 500);
+                            }
+                        }, 3000);
+                    </script>
+                @endif
+
+                <form method="POST" action="{{ route('staff.tanker-departure.store') }}" class="space-y-4" id="fuelForm">
                     @csrf
 
                     {{-- Tanker + Driver + Date --}}

@@ -13,6 +13,6 @@ class TankerDepartureFuel extends Model
 
     public function departure()
     {
-        return $this->belongsTo(TankerDeparture::class);
+        return $this->belongsTo(TankerDeparture::class, 'tanker_departure_id');
     }
 }

@@ -8,6 +8,9 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\TankerHistoryController;
+use App\Http\Controllers\TankerDepartureController;
+use App\Http\Controllers\TankerArrivalController;
 use App\Http\Controllers\TransactionHistoryController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Models\User;
@@ -59,7 +62,7 @@ Route::middleware([RoleMiddleware::class . ':admin'])->prefix('admin')->group(fu
     // Route::view('/overview', 'admin.overview')->name('admin.overview');
     // Route::view('/analytics', 'admin.analytics')->name('admin.analytics');
     // Route::view('/staff-management', 'admin.staff-management')->name('admin.staff-management');
-    Route::view('/transaction-history', 'admin.transaction-history')->name('admin.transaction-history');
+    // Route::view('/transaction-history', 'admin.transaction-history')->name('admin.transaction-history');
     Route::view('/create-admin', 'admin.create-admin')->name('admin.create');
     Route::view('/admin-password', 'admin.admin-password')->name('admin.password-reset');
     Route::view('/br-receipt', 'admin.receipt.reciept')->name('admin.br-receipt');
@@ -90,9 +93,14 @@ Route::middleware([RoleMiddleware::class . ':admin'])->prefix('admin')->group(fu
 });
 
 Route::middleware([RoleMiddleware::class . ':staff'])->prefix('staff')->group(function () {
-    Route::view('/fuel-supply', 'staff.fuel-supply')->name('staff.fuel-supply');
-    Route::view('/tanker-departure', 'staff.tanker-departure')->name('staff.tanker-departure');
+    // Route::view('/fuel-supply', 'staff.fuel-supply')->name('staff.fuel-supply');
+    // Route::get('/fuel-suppy', [TankerHistoryController::class, 'index'])->name('staff.fuel-supply');
+    Route::get('/fuel-supply', [TankerHistoryController::class, 'index'])->name('staff.fuel-supply');
+    Route::view('/tanker-departure', 'staff.tanker-departure')->name('staff.tanker-out');
     Route::view('/tanker-in', 'staff.tanker-in')->name('staff.tanker-in');
+
+    Route::post('/tanker-arrival', [TankerArrivalController::class, 'store'])->name('tanker-arrival.store');
+    Route::post('/tanker-departure', [TankerDepartureController::class, 'store'])->name('staff.tanker-departure.store');
 });
 
 

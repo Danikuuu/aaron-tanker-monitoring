@@ -6,28 +6,7 @@
 @section('content')
 <div class="min-h-screen" style="background-image: url('/images/img.png'); background-size: cover; background-position: center;">
     <div class="min-h-screen bg-black/50 backdrop-blur-sm">
-        <!-- Header -->
-        <!-- <header class="bg-[#FF5757] rounded-full mx-8 mt-8 px-8 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-black rounded-full flex items-center justify-center">
-                        <div class="text-[#FF5757] text-xl font-bold">A</div>
-                    </div>
-                </div>
-                <nav class="flex items-center gap-8">
-                    <a href="" class="text-white hover:text-gray-200 transition">Home</a>
-                    <a href="" class="text-white hover:text-gray-200 transition">Tanker/In</a>
-                    <div class="relative">
-                        <button class="text-white hover:text-gray-200 transition flex items-center gap-2">
-                            Tanker/Out
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </nav>
-            </div>
-        </header> -->
+  
 
         <!-- Main Content -->
         <div class="flex items-center justify-center px-8 py-16">
@@ -64,7 +43,6 @@
                     <table class="w-full">
                         <thead>
                             <tr class="bg-[#FF5757] text-white">
-                                <th class="px-4 py-3 text-left rounded-tl-lg">ID</th>
                                 <th class="px-4 py-3 text-left">Tanker Number</th>
                                 <th class="px-4 py-3 text-left">Arrival date In/Out</th>
                                 <th class="px-4 py-3 text-left">Fuel Type</th>
@@ -72,15 +50,16 @@
                             </tr>
                         </thead>
                         <tbody class="bg-gray-50">
-                            @for($i = 1; $i <= 5; $i++)
-                            <tr class="border-b border-gray-200">
-                                <td class="px-4 py-3">{{ $i }}</td>
-                                <td class="px-4 py-3">01234</td>
-                                <td class="px-4 py-3">01/18/2026</td>
-                                <td class="px-4 py-3">Ipsum</td>
-                                <td class="px-4 py-3">1,234 Litters</td>
-                            </tr>
-                            @endfor
+                            @foreach($arrivals as $arrival)
+                                @foreach($arrival->fuels as $fuel)
+                                <tr class="border-b border-gray-200">
+                                    <td class="px-4 py-3">{{ $arrival->tanker_number }}</td>
+                                    <td class="px-4 py-3">{{ $arrival->arrival_date->format('Y-m-d') }}</td>
+                                    <td class="px-4 py-3">{{ $fuel->fuel_type }}</td>
+                                    <td class="px-4 py-3">{{ $fuel->liters}}</td>
+                                </tr>
+                                @endforeach
+                             @endforeach
                         </tbody>
                     </table>
                 </div>
