@@ -31,7 +31,7 @@
             Remember Me
         </label>
 
-        <a href="#" class="text-primary hover:underline">Forgot password</a>
+        <a href="{{ route('password.forgot.show') }}" class="text-primary hover:underline">Forgot password</a>
     </div>
 
     <!-- Captcha Placeholder -->

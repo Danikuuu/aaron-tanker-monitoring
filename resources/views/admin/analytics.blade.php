@@ -9,17 +9,22 @@
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold">Analytics</h1>
         <form method="GET" action="{{ route('admin.analytics') }}" class="flex items-center gap-3">
-            <label class="text-sm font-medium text-gray-600">Time Range:</label>
-            <select name="months" onchange="this.form.submit()"
-                    class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5757]">
-                <option value="3"  {{ $months == 3  ? 'selected' : '' }}>Last 3 Months</option>
-                <option value="6"  {{ $months == 6  ? 'selected' : '' }}>Last 6 Months</option>
-                <option value="12" {{ $months == 12 ? 'selected' : '' }}>Last 12 Months</option>
-            </select>
+            <label class="text-sm font-medium text-gray-600">Period:</label>
+            <div class="flex rounded-lg border border-gray-300 overflow-hidden text-sm">
+                @foreach(['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly', 'yearly' => 'Yearly'] as $value => $label)
+                <button type="submit" name="period" value="{{ $value }}"
+                    class="px-4 py-2 transition
+                        {{ $period === $value
+                            ? 'bg-[#FF5757] text-white font-semibold'
+                            : 'bg-white text-gray-600 hover:bg-gray-50' }}">
+                    {{ $label }}
+                </button>
+                @endforeach
+            </div>
         </form>
     </div>
 
-    {{-- Summary Cards --}}
+    {{-- Summary Cards - Arrivals --}}
     <div class="grid grid-cols-4 gap-4">
         @foreach(['diesel' => ['label' => 'Diesel Arrived', 'color' => 'text-green-600'],
                   'premium'  => ['label' => 'Premium Arrived',  'color' => 'text-yellow-600'],
@@ -34,6 +39,7 @@
         @endforeach
     </div>
 
+    {{-- Summary Cards - Departures --}}
     <div class="grid grid-cols-4 gap-4">
         @foreach(['diesel' => ['label' => 'Diesel Dispatched', 'color' => 'text-green-600'],
                   'premium'  => ['label' => 'Premium Dispatched',  'color' => 'text-yellow-600'],
@@ -55,8 +61,8 @@
     {{-- Arrival Chart --}}
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold">Monthly Fuel Tanker Arrival</h2>
-            <a href="{{ route('admin.analytics.export', ['type' => 'arrival', 'months' => $months]) }}"
+            <h2 class="text-xl font-semibold">Fuel Tanker Arrival</h2>
+            <a href="{{ route('admin.analytics.export', ['type' => 'arrival', 'period' => $period]) }}"
                class="bg-[#FF5757] text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition text-sm flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -73,8 +79,8 @@
     {{-- Departure Chart --}}
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold">Monthly Fuel Tanker Departure</h2>
-            <a href="{{ route('admin.analytics.export', ['type' => 'departure', 'months' => $months]) }}"
+            <h2 class="text-xl font-semibold">Fuel Tanker Departure</h2>
+            <a href="{{ route('admin.analytics.export', ['type' => 'departure', 'period' => $period]) }}"
                class="bg-[#FF5757] text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition text-sm flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -88,7 +94,7 @@
         </div>
     </div>
 
-    {{-- Methanol Breakdown Chart --}}
+    {{-- Methanol Breakdown --}}
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-xl font-semibold mb-6">Methanol Mixture Breakdown (Departures)</h2>
         <div class="grid grid-cols-2 gap-6">
@@ -98,11 +104,11 @@
             <div class="space-y-3 flex flex-col justify-center">
                 @foreach(['diesel', 'premium', 'unleaded'] as $fuel)
                 @php
-                    $row        = $departureTotals[$fuel] ?? null;
-                    $total      = $row ? (float)$row->total : 0;
-                    $methanol   = $row ? (float)$row->total_methanol : 0;
-                    $pure       = $total - $methanol;
-                    $pct        = $total > 0 ? round($methanol / $total * 100, 1) : 0;
+                    $row      = $departureTotals[$fuel] ?? null;
+                    $total    = $row ? (float)$row->total : 0;
+                    $methanol = $row ? (float)$row->total_methanol : 0;
+                    $pure     = $total - $methanol;
+                    $pct      = $total > 0 ? round($methanol / $total * 100, 1) : 0;
                 @endphp
                 <div class="bg-white border border-gray-200 rounded-lg p-4">
                     <div class="flex justify-between items-center mb-2">
@@ -135,6 +141,7 @@
 <script>
     const arrivalRaw   = @json($arrivalData);
     const departureRaw = @json($departureData);
+    const period       = @json($period);
     const fuelTypes    = ['diesel', 'premium', 'unleaded', 'methanol'];
     const fuelColors   = {
         diesel:   '#22c55e',
@@ -143,14 +150,17 @@
         methanol: '#a855f7',
     };
 
+    // The groupBy key changes depending on period
+    const groupKey = { daily: 'day', weekly: 'week', monthly: 'month', yearly: 'year' }[period];
+
     function buildDatasets(raw) {
-        const months = Object.keys(raw).sort();
+        const labels = Object.keys(raw).sort();
         return {
-            months,
+            labels,
             datasets: fuelTypes.map(fuel => ({
                 label:           fuel.charAt(0).toUpperCase() + fuel.slice(1),
-                data:            months.map(m => {
-                    const row = raw[m]?.find(r => r.fuel_type === fuel);
+                data:            labels.map(lbl => {
+                    const row = raw[lbl]?.find(r => r.fuel_type === fuel);
                     return row ? parseFloat(row.total) : 0;
                 }),
                 backgroundColor: fuelColors[fuel],
@@ -160,10 +170,10 @@
     }
 
     function makeChart(id, raw) {
-        const { months, datasets } = buildDatasets(raw);
+        const { labels, datasets } = buildDatasets(raw);
         new Chart(document.getElementById(id), {
             type: 'bar',
-            data: { labels: months, datasets },
+            data: { labels, datasets },
             options: {
                 responsive:          true,
                 maintainAspectRatio: false,
@@ -205,7 +215,7 @@
 
             pieLabels.push(fuel.charAt(0).toUpperCase() + fuel.slice(1) + ' (Methanol)');
             pieData.push(parseFloat(row.total_methanol));
-            pieColors.push(fuelColors[fuel] + '80'); // semi-transparent
+            pieColors.push(fuelColors[fuel] + '80');
         }
     });
 

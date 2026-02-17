@@ -13,20 +13,7 @@
             <div class="bg-white rounded-lg shadow-2xl p-8 w-full max-w-3xl">
                 <div class="text-center mb-8">
                     <div class="flex items-center justify-center gap-3 mb-4">
-                        <div class="w-16 h-16 bg-black rounded-full flex items-center justify-center">
-                            <div class="text-[#FF5757] text-2xl font-bold">A</div>
-                        </div>
-                        <div>
-                            <h1 class="text-4xl font-bold tracking-wide">AARON</h1>
-                            <div class="flex items-center gap-2">
-                                <div class="text-xs">SINCE 2004</div>
-                                <div class="flex gap-0.5">
-                                    @for($i = 0; $i < 12; $i++)
-                                        <div class="w-1.5 h-1.5 {{ $i % 2 == 0 ? 'bg-black' : 'bg-white border border-black' }}"></div>
-                                    @endfor
-                                </div>
-                            </div>
-                        </div>
+                        <img src="{{ asset('images/AARON.png') }}" class="h-48 xl:h-24 w-auto">
                     </div>
                     <h2 class="text-2xl font-bold">Fuel Supply In/Out</h2>
                 </div>

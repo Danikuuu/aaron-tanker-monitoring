@@ -4,18 +4,28 @@ namespace App\Providers;
 
 use App\Repositories\Admin\AnalyticsInterface;
 use App\Repositories\Admin\AnalyticsRepository;
+use App\Repositories\Admin\BrReceiptRepository;
+use App\Repositories\Admin\BrReceiptInterface;
+use App\Repositories\Admin\BrReceiptPaymentRepository;
+use App\Repositories\Admin\BrReceiptPaymentInterface;
 use App\Repositories\Admin\FuelSummaryInterface;
 use App\Repositories\Admin\FuelSummaryRepository;
 use App\Repositories\Admin\OverviewInterface;
 use App\Repositories\Admin\OverviewRepository;
 use App\Repositories\Admin\ReceiptInterface;
 use App\Repositories\Admin\ReceiptRepository;
+use App\Repositories\Admin\StaffManagementInterface;
+use App\Repositories\Admin\StaffManagementRepository;
 use App\Repositories\Admin\TransactionHistoryInterface;
 use App\Repositories\Admin\TransactionHistoryRepository;
+use App\Repositories\Auth\ForgotPasswordRepository;
+use App\Repositories\Auth\ForgotPasswordInterface;
 use App\Repositories\Auth\LoginInterface;
 use App\Repositories\Auth\LoginRepository;
 use App\Repositories\Auth\RegisterInterface;
 use App\Repositories\Auth\RegisterRepository;
+use App\Repositories\Auth\ResetPasswordInterface;
+use App\Repositories\Auth\ResetPasswordRepository;
 use App\Repositories\Staff\FuelSupplyRepository;
 use App\Repositories\Staff\FuelSupplyRepositoryInterface;
 use App\Repositories\Staff\TankerArrivalRepository;
@@ -85,6 +95,31 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             TankerHistoryRepositoryInterface::class,
             TankerHistoryRepository::class
+        );
+
+        $this->app->bind(
+            BrReceiptInterface::class, 
+            BrReceiptRepository::class
+        );
+
+        $this->app->bind(
+            BrReceiptPaymentInterface::class, 
+            BrReceiptPaymentRepository::class
+        );
+
+        $this->app->bind(
+            ForgotPasswordInterface::class, 
+            ForgotPasswordRepository::class
+        );
+
+        $this->app->bind(
+            ResetPasswordInterface::class,
+            ResetPasswordRepository::class,
+        );
+
+        $this->app->bind(
+            StaffManagementInterface::class,
+            StaffManagementRepository::class,
         );
 
     }

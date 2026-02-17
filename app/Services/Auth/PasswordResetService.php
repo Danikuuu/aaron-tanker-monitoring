@@ -28,6 +28,7 @@ class PasswordResetService
                 $user->forceFill([
                     'password' => Hash::make($password),
                 ])->save();
+                
             }
         );
 

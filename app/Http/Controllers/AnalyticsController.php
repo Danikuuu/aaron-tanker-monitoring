@@ -15,7 +15,7 @@ class AnalyticsController extends Controller
     public function index(AnalyticsFilterRequest $request)
     {
         $data = $this->analyticsService->getAnalyticsData(
-            $request->months()
+            $request->period()
         );
 
         return view('admin.analytics', $data);

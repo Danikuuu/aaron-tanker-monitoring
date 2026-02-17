@@ -14,12 +14,12 @@ class AnalyticsFilterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'months' => 'sometimes|integer|in:3,6,12',
+            'period' => 'sometimes|string|in:daily,weekly,monthly,yearly',
         ];
     }
 
-    public function months(): int
+    public function period(): string
     {
-        return (int) $this->get('months', 6);
+        return $this->get('period', 'monthly');
     }
 }

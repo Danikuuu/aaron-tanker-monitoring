@@ -12,25 +12,25 @@ class AnalyticsService
         protected AnalyticsInterface $analyticsRepository
     ) {}
 
-    public function getAnalyticsData(int $months): array
+    public function getAnalyticsData(string $period): array
     {
         return [
-            'arrivalData'     => $this->analyticsRepository->getMonthlyArrivalChart($months),
-            'departureData'   => $this->analyticsRepository->getMonthlyDepartureChart($months),
-            'arrivalTotals'   => $this->analyticsRepository->getArrivalTotals($months),
-            'departureTotals' => $this->analyticsRepository->getDepartureTotals($months),
-            'months'          => $months,
+            'arrivalData'     => $this->analyticsRepository->getArrivalChart($period),
+            'departureData'   => $this->analyticsRepository->getDepartureChart($period),
+            'arrivalTotals'   => $this->analyticsRepository->getArrivalTotals($period),
+            'departureTotals' => $this->analyticsRepository->getDepartureTotals($period),
+            'period'          => $period,
         ];
     }
 
-    public function exportCsv(string $type, int $months): StreamedResponse
+    public function exportCsv(string $type, string $period): StreamedResponse
     {
         if ($type === 'arrival') {
-            $rows     = $this->analyticsRepository->getArrivalExportRows($months);
+            $rows     = $this->analyticsRepository->getArrivalExportRows($period);
             $headers  = ['ID', 'Tanker No.', 'Arrival Date', 'Recorded By', 'Fuel Type', 'Liters'];
             $filename = 'fuel_arrivals_' . now()->format('Ymd') . '.csv';
         } else {
-            $rows     = $this->analyticsRepository->getDepartureExportRows($months);
+            $rows     = $this->analyticsRepository->getDepartureExportRows($period);
             $headers  = ['ID', 'Tanker No.', 'Driver', 'Departure Date', 'Recorded By', 'Fuel Type', 'Liters', 'Methanol %', 'Methanol L', 'Pure L'];
             $filename = 'fuel_departures_' . now()->format('Ymd') . '.csv';
         }

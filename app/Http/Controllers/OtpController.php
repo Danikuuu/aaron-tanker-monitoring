@@ -20,21 +20,30 @@ class OtpController extends Controller
         $enteredOtp = implode('', $request->otp);
 
         try {
-            // Determine context from session, don't blindly try both
+            // ── Login context ──────────────────────────────────────────────
             if (Session::has('otp.login')) {
                 $payload = $otpService->verify('login', $enteredOtp);
-                // dd($payload);
                 $user = $loginService->loginById($payload['user_id']);
                 return $this->redirectByRole($user);
             }
 
+            // ── Registration context ───────────────────────────────────────
             if (Session::has('otp.register')) {
                 $payload = $otpService->verify('register', $enteredOtp);
-                // dd($payload);
                 $user = $registerService->completeRegistration($payload);
                 $otpService->clear('register');
-                // Auth::login($user);
                 return $this->redirectByRole($user);
+            }
+
+            // ── Password-reset context ─────────────────────────────────────
+            if (Session::has('otp.password_reset')) {
+                $payload = $otpService->verify('password_reset', $enteredOtp);
+                $otpService->clear('password_reset');
+
+                // Store verified user ID so the reset-password form is protected
+                Session::put('password_reset_verified_user', $payload['user_id']);
+
+                return redirect()->route('password.reset.show');
             }
 
             return back()->withErrors(['otp' => 'OTP session expired.']);
@@ -45,6 +54,8 @@ class OtpController extends Controller
             return back()->withErrors(['otp' => $e->getMessage()]);
         }
     }
+
+    // ── helpers ───────────────────────────────────────────────────────────────
 
     private function redirectByRole($user)
     {

@@ -1,13 +1,18 @@
 <?php
 
+use App\Http\Controllers\BrReceiptPaymentController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\ApprovalController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\BrReceiptController;
 use App\Http\Controllers\FuelSummaryController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\ResetPasswordController;
+use App\Http\Controllers\StaffManagementController;
 use App\Http\Controllers\TankerHistoryController;
 use App\Http\Controllers\TankerDepartureController;
 use App\Http\Controllers\TankerArrivalController;
@@ -39,12 +44,18 @@ Route::post('/login', [LoginController::class, 'store'])
 
 
 // ===============================
-// OTP (Unified for login + register)
+// OTP (Unified for login + register + forget password)
 // ===============================
 Route::post('/otp', [OtpController::class, 'verify'])
     ->middleware('throttle:5,1')
     ->name('otp.verify');
 
+
+Route::get('/forgot-password',  [ForgotPasswordController::class, 'show'])->name('password.forgot.show');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'send'])->name('password.forgot.send');
+
+Route::get('/reset-password',  [ResetPasswordController::class, 'show'])->name('password.reset.show');
+Route::post('/reset-password', [ResetPasswordController::class, 'update'])->name('password.reset.update');
 
 // ===============================
 // LOGOUT
@@ -63,9 +74,23 @@ Route::middleware([RoleMiddleware::class . ':admin'])->prefix('admin')->group(fu
     // Route::view('/analytics', 'admin.analytics')->name('admin.analytics');
     // Route::view('/staff-management', 'admin.staff-management')->name('admin.staff-management');
     // Route::view('/transaction-history', 'admin.transaction-history')->name('admin.transaction-history');
-    Route::view('/create-admin', 'admin.create-admin')->name('admin.create');
+    // Route::view('/create-admin', 'admin.create-admin')->name('admin.create');
+    Route::post('/staff-management', [StaffManagementController::class, 'store'])
+    ->name('admin.staff.create');
     Route::view('/admin-password', 'admin.admin-password')->name('admin.password-reset');
-    Route::view('/br-receipt', 'admin.receipt.reciept')->name('admin.br-receipt');
+    // Route::view('/br-receipt', 'admin.receipt.reciept')->name('admin.br-receipt');
+    Route::get('/br-receipt', [BrReceiptController::class, 'index'])->name('admin.br-receipt');
+
+    Route::get('/br-receipt-payments', [BrReceiptPaymentController::class, 'index'])
+        ->name('admin.br-receipt-payments.index');
+
+    // View + edit payment for a specific receipt
+    Route::get('/br-receipt-payments/{id}', [BrReceiptPaymentController::class, 'show'])
+        ->name('admin.br-receipt-payments.show');
+
+    // Create or update payment record
+    Route::put('/br-receipt-payments/{id}/payment', [BrReceiptPaymentController::class, 'upsertPayment'])
+        ->name('admin.br-receipt-payments.upsert');
 
     Route::get('/overview', [OverviewController::class, 'index'])->name('admin.overview');
 

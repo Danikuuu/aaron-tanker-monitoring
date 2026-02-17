@@ -14,18 +14,15 @@ class StoreTankerArrivalRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tanker_number'   => 'required|string|max:255',
-            'driver'          => 'required|string|max:255',
-            'departure_date'  => 'required|date',
+            'tanker_number'  => 'required|string|max:255',
+            'driver'         => 'required|string|max:255',
+            'departure_date' => 'required|date',
 
-            'fuel_type'       => 'required|array',
-            'fuel_type.*'     => 'nullable|string|in:diesel,premium,unleaded,methanol',
+            'fuel_type'      => 'required|array',
+            'fuel_type.*'    => 'nullable|string|in:diesel,premium,unleaded,methanol',
 
-            'liters'          => 'required|array',
-            'liters.*'        => 'nullable|numeric|min:1',
-
-            'methanol_liters' => 'nullable|array',
-            'methanol_liters.*' => 'nullable|numeric|min:0'
+            'liters'         => 'required|array',
+            'liters.*'       => 'nullable|numeric|min:1',
         ];
     }
 
@@ -33,7 +30,7 @@ class StoreTankerArrivalRequest extends FormRequest
     {
         return [
             'fuel_type.1.required' => 'At least one fuel type is required.',
-            'liters.1.required'    => 'Liters for first fuel slot is required.'
+            'liters.1.required'    => 'Liters for first fuel slot is required.',
         ];
     }
 }

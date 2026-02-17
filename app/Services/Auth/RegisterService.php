@@ -4,6 +4,7 @@ namespace App\Services\Auth;
 
 use App\Mail\NewStaffRegistered;
 use App\Mail\OtpMail;
+use App\Models\AuditLog;
 use App\Models\User;
 use App\Repositories\Auth\RegisterInterface;
 use App\Services\Auth\OtpService;
@@ -43,12 +44,14 @@ class RegisterService
             'first_name' => $data['first_name'],
             'last_name'  => $data['last_name'],
             'email'      => $data['email'],
-            'password'   => bcrypt($data['password']), // hash now
-            'role'       => 'staff', // default role
+            'password'   => bcrypt($data['password']),
+            'role'       => 'staff',
         ]);
 
         // 4️⃣ Send OTP email
         Mail::to($data['email'])->send(new OtpMail($otp));
+
+        AuditLog::record('Register', "New staff registration OTP sent to: {$data['email']}");
     }
 
     /**
@@ -59,6 +62,8 @@ class RegisterService
     {
         $user = $this->registerRepository->create($payload);
 
+        AuditLog::record('Register', "New staff account created: {$user->email}", $user);
+
         // Notify all admins of new registration
         $admins = User::where('role', 'admin')->get();
 
@@ -68,7 +73,6 @@ class RegisterService
 
         return $user;
     }
-
 
     /**
      * Verify Google reCAPTCHA v2 token.

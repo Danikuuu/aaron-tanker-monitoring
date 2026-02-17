@@ -14,10 +14,7 @@
         <div class="container mx-auto flex items-center justify-between px-6 py-4">
             <!-- Logo -->
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                    <div class="text-[#FF5757] font-bold text-xl">A</div>
-                </div>
-                <span class="font-semibold text-lg">Aaron Gas Station</span>
+                <img src="{{ asset('images/AARON1.png') }}" class="h-48 xl:h-20 w-auto">
             </div>
 
             <!-- Navigation -->

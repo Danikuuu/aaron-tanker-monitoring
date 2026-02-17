@@ -17,15 +17,18 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        // User::factory()->create([
-        //     'first_name' => 'Test',
-        //     'last_name' => 'Staff',
-        //     'email' => '6ifau5nfyl@ruutukf.com',
-        //     'password' => bcrypt('111111'),
-        //     'is_approved' => true,
-        //     'role' => 'staff',
-        // ]);
+        User::factory()->create([
+            'first_name' => 'Test',
+            'last_name' => 'Staff',
+            'email' => '6ifau5nfyl@ruutukf.com',
+            'password' => bcrypt('111111'),
+            'role' => 'staff',
+            'status' => 'approved',
+        ]);
 
         $this->call(FuelOperationsSeeder::class);
+
+        
+         $this->call(DemoDataSeeder::class);
     }
 }

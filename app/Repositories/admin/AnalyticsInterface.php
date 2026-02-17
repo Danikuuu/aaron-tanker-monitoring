@@ -6,15 +6,15 @@ use Illuminate\Support\Collection;
 
 interface AnalyticsInterface
 {
-    public function getMonthlyArrivalChart(int $months): Collection;
+    public function getArrivalChart(string $period): Collection;
 
-    public function getMonthlyDepartureChart(int $months): Collection;
+    public function getDepartureChart(string $period): Collection;
 
-    public function getArrivalTotals(int $months): Collection;
+    public function getArrivalTotals(string $period): Collection;
 
-    public function getDepartureTotals(int $months): Collection;
+    public function getDepartureTotals(string $period): Collection;
 
-    public function getArrivalExportRows(int $months): Collection;
+    public function getArrivalExportRows(string $period): Collection;
 
-    public function getDepartureExportRows(int $months): Collection;
+    public function getDepartureExportRows(string $period): Collection;
 }

@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Models\AuditLog;
 use App\Repositories\Auth\LoginInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -45,7 +46,7 @@ class LoginService
 
         // 3️⃣ Attempt authentication
         if (!Auth::attempt([
-            'email' => $data['email'],
+            'email'    => $data['email'],
             'password' => $data['password'],
         ])) {
             throw ValidationException::withMessages([
@@ -54,7 +55,6 @@ class LoginService
         }
 
         // 4️⃣ Regenerate session
-        session()->regenerate();
     }
 
     private function verifyRecaptcha(string $token): void
@@ -62,7 +62,7 @@ class LoginService
         $response = Http::asForm()->post(
             'https://www.google.com/recaptcha/api/siteverify',
             [
-                'secret' => config('services.recaptcha.secret_key'),
+                'secret'   => config('services.recaptcha.secret_key'),
                 'response' => $token,
                 'remoteip' => request()->ip(),
             ]
@@ -101,6 +101,8 @@ class LoginService
             ]);
         }
 
+        AuditLog::record('Login', "User passed credential check: {$user->email}", $user);
+
         return $user;
     }
 
@@ -108,10 +110,11 @@ class LoginService
     {
         $user = $this->loginRepository->findById($userId);
 
-        Auth::login($user); // now the user is fully authenticated
+        Auth::login($user);
         session()->regenerate();
+
+        AuditLog::record('Login', "User logged in successfully: {$user->email}", $user);
 
         return $user;
     }
-
 }
