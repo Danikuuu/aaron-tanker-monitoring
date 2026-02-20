@@ -18,26 +18,26 @@ use App\Http\Controllers\TankerDepartureController;
 use App\Http\Controllers\TankerArrivalController;
 use App\Http\Controllers\TransactionHistoryController;
 use App\Http\Middleware\RoleMiddleware;
-use App\Models\User;
 use Illuminate\Support\Facades\Route;
-
-
-Route::view('/', 'auth.login')->name('login');
-Route::view('/register', 'auth.signup')->name('register');
-Route::view('/otp', 'auth.otp')->name('otp');
 
 
 // ===============================
 // REGISTER
 // ===============================
+Route::view('/register', 'auth.signup')->name('register');
+
 Route::post('/register', [RegisterController::class, 'store'])
     ->middleware('throttle:5,1')
     ->name('register.attempt');
+
+Route::post('/register/resend-otp', [RegisterController::class, 'resendOtp'])->name('register.resend.otp');
 
 
 // ===============================
 // LOGIN
 // ===============================
+Route::view('/', 'auth.login')->name('login');
+
 Route::post('/login', [LoginController::class, 'store'])
     ->middleware('throttle:5,1')
     ->name('login.attempt');
@@ -46,14 +46,26 @@ Route::post('/login', [LoginController::class, 'store'])
 // ===============================
 // OTP (Unified for login + register + forget password)
 // ===============================
+Route::view('/otp', 'auth.otp')->name('otp');
+
 Route::post('/otp', [OtpController::class, 'verify'])
     ->middleware('throttle:5,1')
     ->name('otp.verify');
 
+Route::post('/otp/resend', [OtpController::class, 'resend'])->name('otp.resend');
+
+
+// ===============================
+// Forgot password
+// ===============================
 
 Route::get('/forgot-password',  [ForgotPasswordController::class, 'show'])->name('password.forgot.show');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'send'])->name('password.forgot.send');
+Route::post('/forgot-password/resend-otp', [ForgotPasswordController::class, 'resendOtp'])->name('password.resend.otp');
 
+// ===============================
+// Reset password
+// ===============================
 Route::get('/reset-password',  [ResetPasswordController::class, 'show'])->name('password.reset.show');
 Route::post('/reset-password', [ResetPasswordController::class, 'update'])->name('password.reset.update');
 
@@ -64,34 +76,39 @@ Route::post('/logout', [LoginController::class, 'destroy'])
     ->name('logout');
 
 
-    // modify tommorow
-// Route::view('/reset-password', 'auth.reset-password')->name('reset-password');
-
-
-
+// ===============================
+// ADMIN ROUTES
+// ===============================
 Route::middleware([RoleMiddleware::class . ':admin'])->prefix('admin')->group(function () {
-    // Route::view('/overview', 'admin.overview')->name('admin.overview');
-    // Route::view('/analytics', 'admin.analytics')->name('admin.analytics');
-    // Route::view('/staff-management', 'admin.staff-management')->name('admin.staff-management');
-    // Route::view('/transaction-history', 'admin.transaction-history')->name('admin.transaction-history');
-    // Route::view('/create-admin', 'admin.create-admin')->name('admin.create');
-    Route::post('/staff-management', [StaffManagementController::class, 'store'])
-    ->name('admin.staff.create');
+
+    // ===============================
+    // Admin change password (for their own account)
+    // ===============================
     Route::view('/admin-password', 'admin.admin-password')->name('admin.password-reset');
-    // Route::view('/br-receipt', 'admin.receipt.reciept')->name('admin.br-receipt');
+
+
+    // ===============================
+    // BR Receipt Management
+    // ===============================
     Route::get('/br-receipt', [BrReceiptController::class, 'index'])->name('admin.br-receipt');
+
+    Route::post('/br-receipt', [BrReceiptController::class, 'store'])->name('admin.br-receipt.store');
+    
+    Route::get('/br-receipt/next-number', [BrReceiptController::class, 'getNextReceiptNumber'])->name('admin.br-receipt.next-number');
 
     Route::get('/br-receipt-payments', [BrReceiptPaymentController::class, 'index'])
         ->name('admin.br-receipt-payments.index');
 
-    // View + edit payment for a specific receipt
     Route::get('/br-receipt-payments/{id}', [BrReceiptPaymentController::class, 'show'])
         ->name('admin.br-receipt-payments.show');
 
-    // Create or update payment record
     Route::put('/br-receipt-payments/{id}/payment', [BrReceiptPaymentController::class, 'upsertPayment'])
         ->name('admin.br-receipt-payments.upsert');
 
+
+    // ===============================
+    // Admin dashboard & reports
+    // ===============================
     Route::get('/overview', [OverviewController::class, 'index'])->name('admin.overview');
 
     Route::get('/analytics',        [AnalyticsController::class, 'index'])->name('admin.analytics');
@@ -104,11 +121,18 @@ Route::middleware([RoleMiddleware::class . ':admin'])->prefix('admin')->group(fu
     Route::get('/transaction-history',        [TransactionHistoryController::class, 'index'])->name('admin.transaction-history');
     Route::get('/transaction-history/export', [TransactionHistoryController::class, 'export'])->name('admin.transaction-history.export');
 
+
+    // ===============================
+    // Staff management (create, approve, block/unblock, delete)
+    // ===============================
+    Route::post('/staff-management', [StaffManagementController::class, 'store'])
+        ->name('admin.staff.create');
     Route::get('/staff-management', [ApprovalController::class, 'index'])->name('admin.staff-management');
     Route::post('/staff/{staffId}/approve',  [ApprovalController::class, 'approve'])->name('admin.staff.approve');
     Route::post('/staff/{staffId}/block',    [ApprovalController::class, 'block'])->name('admin.staff.block');
     Route::post('/staff/{staffId}/unblock',  [ApprovalController::class, 'unblock'])->name('admin.staff.unblock');
     Route::delete('/staff/{staffId}',        [ApprovalController::class, 'destroy'])->name('admin.staff.delete');
+
 
     Route::get('/forgot-password',  [PasswordResetController::class, 'create'])->name('admin.password.request');
     Route::post('/forgot-password', [PasswordResetController::class, 'store'])->name('admin.password.email');
@@ -117,9 +141,16 @@ Route::middleware([RoleMiddleware::class . ':admin'])->prefix('admin')->group(fu
     
 });
 
+
+// ===============================
+// STAFF ROUTES
+// ===============================
 Route::middleware([RoleMiddleware::class . ':staff'])->prefix('staff')->group(function () {
-    // Route::view('/fuel-supply', 'staff.fuel-supply')->name('staff.fuel-supply');
-    // Route::get('/fuel-suppy', [TankerHistoryController::class, 'index'])->name('staff.fuel-supply');
+
+
+    // ===============================
+    // Staff routes for in and out of tankers
+    // ===============================
     Route::get('/fuel-supply', [TankerHistoryController::class, 'index'])->name('staff.fuel-supply');
     Route::view('/tanker-departure', 'staff.tanker-departure')->name('staff.tanker-out');
     Route::view('/tanker-in', 'staff.tanker-in')->name('staff.tanker-in');
@@ -127,17 +158,3 @@ Route::middleware([RoleMiddleware::class . ':staff'])->prefix('staff')->group(fu
     Route::post('/tanker-arrival', [TankerArrivalController::class, 'store'])->name('tanker-arrival.store');
     Route::post('/tanker-departure', [TankerDepartureController::class, 'store'])->name('staff.tanker-departure.store');
 });
-
-
-
-Route::get('/admin/delete-user/{id}', function ($id) {
-    $user = User::find($id);
-
-    if (!$user) {
-        return redirect()->back()->with('error', 'User not found');
-    }
-
-    $user->delete();
-
-    return redirect()->back()->with('success', 'User deleted successfully');
-})->name('admin.delete-user');

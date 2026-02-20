@@ -12,6 +12,9 @@ class AnalyticsController extends Controller
         protected AnalyticsService $analyticsService
     ) {}
 
+    /**
+     * Return analytics data for the dashboard based on the selected period.
+     */
     public function index(AnalyticsFilterRequest $request)
     {
         $data = $this->analyticsService->getAnalyticsData(
@@ -21,6 +24,9 @@ class AnalyticsController extends Controller
         return view('admin.analytics', $data);
     }
 
+    /**
+     * Export analytics data to CSV.
+     */
     public function export(AnalyticsFilterRequest $request)
     {
         return $this->analyticsService->exportCsv(

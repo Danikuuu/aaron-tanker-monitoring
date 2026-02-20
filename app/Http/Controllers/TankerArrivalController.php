@@ -12,6 +12,9 @@ class TankerArrivalController extends Controller
         protected TankerArrivalService $service
     ) {}
 
+    /**
+     * Handle the recording of a tanker arrival, including validation and business logic, and provide feedback to the user.
+     */
     public function store(StoreTankerArrivalRequest $request)
     {
         $this->service->store($request->validated());

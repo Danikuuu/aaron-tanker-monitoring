@@ -39,7 +39,7 @@
             required
             class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:outline-none @error('password') border-red-400 @enderror">
         @error('password')
-            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+            <p class="text-primary text-sm mt-1">{{ $message }}</p>
         @enderror
     </div>
 

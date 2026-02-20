@@ -8,6 +8,9 @@ use App\Services\Admin\StaffManagementService;
 
 class StaffManagementController extends Controller
 {
+    /**
+     * Handle the creation of a new staff member (admin or staff) and log the action in the audit log.
+     */
     public function store(CreateStaffRequest $request, StaffManagementService $service)
     {
         $user = $service->createUser(

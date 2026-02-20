@@ -16,7 +16,7 @@ return new class extends Migration
             $table->decimal('total_amount', 12, 2);          // mirrors grand_total
             $table->decimal('down_payment', 12, 2)->default(0);
             $table->date('down_payment_date')->nullable();
-            $table->decimal('final_payment', 12, 2)->default(0);
+            $table->decimal('final_payment', 12, 2)->nullable()->default(0);
             $table->date('final_payment_date')->nullable();
             $table->date('due_date')->nullable();             // admin-set due date for final
             $table->text('notes')->nullable();

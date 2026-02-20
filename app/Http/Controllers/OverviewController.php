@@ -11,6 +11,9 @@ class OverviewController extends Controller
         protected OverviewService $overviewService
     ) {}
 
+    /**
+     * Display the overview dashboard with key metrics and summaries for arrivals, departures, fuel usage, and pending approvals.
+     */
     public function index()
     {
         $data = $this->overviewService->getDashboardData();

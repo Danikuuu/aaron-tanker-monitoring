@@ -7,7 +7,7 @@
 </div>
 
         @error('email')
-            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+            <p class="text-primary text-sm mt-1">{{ $message }}</p>
         @enderror
 
 <form method="POST" action="{{ route('login.attempt') }}" class="space-y-5">
@@ -41,7 +41,7 @@
         </div>
 
         @error('g-recaptcha-response')
-            <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+            <p class="text-primary text-sm mt-2">{{ $message }}</p>
         @enderror
     </div>
 

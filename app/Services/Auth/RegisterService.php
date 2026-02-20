@@ -29,7 +29,7 @@ class RegisterService
      */
     public function register(array $data, OtpService $otpService): void
     {
-        // 1️⃣ Verify reCAPTCHA
+        // Verify reCAPTCHA
         $this->verifyRecaptcha($data['g-recaptcha-response']);
 
         // 2️⃣ Prevent duplicate email
@@ -39,7 +39,7 @@ class RegisterService
             ]);
         }
 
-        // 3️⃣ Generate OTP and store registration payload
+        // Generate OTP and store registration payload
         $otp = $otpService->generate('register', [
             'first_name' => $data['first_name'],
             'last_name'  => $data['last_name'],
@@ -48,7 +48,7 @@ class RegisterService
             'role'       => 'staff',
         ]);
 
-        // 4️⃣ Send OTP email
+        // Send OTP email
         Mail::to($data['email'])->send(new OtpMail($otp));
 
         AuditLog::record('Register', "New staff registration OTP sent to: {$data['email']}");

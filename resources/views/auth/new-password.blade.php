@@ -27,7 +27,7 @@
             <div class="text-center mb-8">
                 <div class="flex items-center justify-center gap-3 mb-6">
                     <div class="w-20 h-20 bg-black rounded-full flex items-center justify-center">
-                        <div class="text-[#FF5757] text-3xl font-bold">A</div>
+                        <div class="text-primary text-3xl font-bold">A</div>
                     </div>
                     <div>
                         <h1 class="text-5xl font-bold tracking-wide">AARON</h1>
@@ -69,7 +69,7 @@
                 {{-- Email --}}
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">
-                        Email address<span class="text-[#FF5757]">*</span>
+                        Email address<span class="text-primary">*</span>
                     </label>
                     <div class="relative">
                         <svg class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -82,7 +82,7 @@
                                placeholder="Enter your email address"
                                required
                                class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg
-                                      focus:outline-none focus:ring-2 focus:ring-[#FF5757]
+                                      focus:outline-none focus:ring-2 focus:ring-primary
                                       @error('email') border-red-400 @enderror">
                     </div>
                     @error('email')
@@ -93,7 +93,7 @@
                 {{-- New Password --}}
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">
-                        New Password<span class="text-[#FF5757]">*</span>
+                        New Password<span class="text-primary">*</span>
                     </label>
                     <div class="relative">
                         <svg class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -105,7 +105,7 @@
                                placeholder="Enter new password"
                                required
                                class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg
-                                      focus:outline-none focus:ring-2 focus:ring-[#FF5757]
+                                      focus:outline-none focus:ring-2 focus:ring-primary
                                       @error('password') border-red-400 @enderror">
                     </div>
                     @error('password')
@@ -118,7 +118,7 @@
                 {{-- Confirm Password --}}
                 <div class="mb-6">
                     <label class="block text-sm font-medium mb-2">
-                        Confirm New Password<span class="text-[#FF5757]">*</span>
+                        Confirm New Password<span class="text-primary">*</span>
                     </label>
                     <div class="relative">
                         <svg class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -130,18 +130,18 @@
                                placeholder="Confirm new password"
                                required
                                class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg
-                                      focus:outline-none focus:ring-2 focus:ring-[#FF5757]">
+                                      focus:outline-none focus:ring-2 focus:ring-primary">
                     </div>
                 </div>
 
                 <button type="submit"
-                        class="w-full bg-[#FF5757] text-white py-3 rounded-full hover:bg-[#ff4040] transition font-semibold text-lg">
+                        class="w-full bg-primary text-white py-3 rounded-full hover:bg-[#ff4040] transition font-semibold text-lg">
                     Reset Password
                 </button>
 
                 <div class="text-center mt-4">
                     <a href="{{ route('login') }}"
-                       class="text-sm text-gray-500 hover:text-[#FF5757] transition">
+                       class="text-sm text-gray-500 hover:text-primary transition">
                         ← Back to Login
                     </a>
                 </div>

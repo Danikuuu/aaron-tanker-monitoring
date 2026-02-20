@@ -1,24 +1,49 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const inputs = document.querySelectorAll(".otp-input");
-    const hiddenInput = document.getElementById("finalOtp");
-    const form = document.getElementById("otpForm");
-
+// public/js/auth/otphelper.js
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('.otp-input');
+    
     inputs.forEach((input, index) => {
-
-        input.addEventListener("input", function () {
-            this.value = this.value.replace(/[^0-9]/g, '');
-
-            if (this.value && index < inputs.length - 1) {
+        // Auto-focus next input
+        input.addEventListener('input', function(e) {
+            const value = e.target.value;
+            
+            // Only allow numbers
+            if (!/^\d*$/.test(value)) {
+                e.target.value = '';
+                return;
+            }
+            
+            // Move to next input
+            if (value.length === 1 && index < inputs.length - 1) {
                 inputs[index + 1].focus();
             }
-
-            updateHiddenOtp();
         });
-
-        input.addEventListener("keydown", function (e) {
-            if (e.key === "Backspace" && !this.value && index > 0) {
+        
+        // Handle backspace
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace' && !e.target.value && index > 0) {
                 inputs[index - 1].focus();
             }
         });
+        
+        // Handle paste
+        input.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pastedData = e.clipboardData.getData('text/plain').trim();
+            
+            if (/^\d{4}$/.test(pastedData)) {
+                pastedData.split('').forEach((char, i) => {
+                    if (inputs[i]) {
+                        inputs[i].value = char;
+                    }
+                });
+                inputs[inputs.length - 1].focus();
+            }
+        });
     });
+    
+    // Auto-focus first input
+    if (inputs.length > 0) {
+        inputs[0].focus();
+    }
 });

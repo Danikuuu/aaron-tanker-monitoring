@@ -13,6 +13,9 @@ class TankerDepartureController extends Controller
         protected TankerDepartureService $service
     ) {}
 
+    /**
+     * Handle the recording of a tanker departure, including validation and business logic, and provide feedback to the user.
+     */
     public function store(StoreTankerDepartureRequest $request)
     {
         try {

@@ -67,7 +67,7 @@ class OtpService
         }
 
         // $otp = rand(1000, 9999);
-        $otp = 1234; // For testing purposes
+        $otp = 5678; // For testing purposes
 
         Session::put("otp.$context", [
             'code' => $otp,

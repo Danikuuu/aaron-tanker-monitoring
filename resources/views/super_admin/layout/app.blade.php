@@ -201,7 +201,7 @@
                     </button>
 
                     {{-- User Profile --}}
-                    <div class="flex items-center gap-2 sm:gap-3 bg-primary py-1 px-2 sm:px-3 rounded-l-3xl">
+                    <div class="flex items-center gap-2 sm:gap-3 bg- py-1 px-2 sm:px-3 rounded-l-3xl">
                         <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#1e1a1a] rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0">
                             <img src="{{ asset('images/logo.png') }}" alt="" srcset="">
                         </div>

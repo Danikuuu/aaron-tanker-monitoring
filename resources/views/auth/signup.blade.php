@@ -7,7 +7,7 @@
 </div>
 
 @if ($errors->any())
-    <div class="text-red-500">
+    <div class="text-primary">
         <ul>
             @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
@@ -52,7 +52,7 @@
         </div>
 
         @error('g-recaptcha-response')
-            <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+            <p class="text-primary text-sm mt-2">{{ $message }}</p>
         @enderror
     </div>
 

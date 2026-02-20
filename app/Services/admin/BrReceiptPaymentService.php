@@ -46,7 +46,7 @@ class BrReceiptPaymentService
 
             $this->repository->saveReceiptFuels($receipt, $validated['fuels']);
 
-            // 🔹 Build fuel summary for audit
+            // Build fuel summary for audit
             $fuelSummary = collect($validated['fuels'])->map(function ($fuel) {
                 return [
                     'fuel_type'  => $fuel['fuel_type'],
@@ -56,7 +56,7 @@ class BrReceiptPaymentService
                 ];
             });
 
-            // 🔹 Main Receipt Log
+            // Main Receipt Log
             AuditLog::record(
                 action: 'br_receipt_created',
                 description: "BR Receipt {$receipt->receipt_no} created.",
@@ -87,7 +87,7 @@ class BrReceiptPaymentService
                 ])
             );
 
-            // 🔹 Payment Log
+            // Payment Log
             AuditLog::record(
                 action: 'br_payment_updated',
                 description: "Payment updated for Receipt {$receipt->receipt_no}.",

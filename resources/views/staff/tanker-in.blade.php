@@ -40,24 +40,24 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium mb-2">
-                                Tanker Number<span class="text-[#FF5757]">*</span>
+                                Tanker Number<span class="text-primary">*</span>
                             </label>
                             <input type="text" name="tanker_number" placeholder="Enter tanker number" required
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5757]">
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-2">
-                                Driver<span class="text-[#FF5757]">*</span>
+                                Driver<span class="text-primary">*</span>
                             </label>
                             <input type="text" name="driver" placeholder="Enter driver name" required
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5757]">
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
                         </div>
                         <div class="col-span-2">
                             <label class="block text-sm font-medium mb-2">
-                                Arrival Date<span class="text-[#FF5757]">*</span>
+                                Arrival Date<span class="text-primary">*</span>
                             </label>
                             <input type="date" name="departure_date" required value="{{ date('Y-m-d') }}"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5757]">
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
                         </div>
                     </div>
 
@@ -75,10 +75,10 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium mb-2">
-                                        Fuel Type @if($i === 1)<span class="text-[#FF5757]">*</span>@endif
+                                        Fuel Type @if($i === 1)<span class="text-primary">*</span>@endif
                                     </label>
                                     <select name="fuel_type[{{ $i }}]"
-                                            class="fuel-select w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5757]"
+                                            class="fuel-select w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                                             {{ $i === 1 ? 'required' : '' }}>
                                         <option value="">Select fuel type</option>
                                         <option value="diesel">Diesel</option>
@@ -89,11 +89,11 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium mb-2">
-                                        Liters to Deliver @if($i === 1)<span class="text-[#FF5757]">*</span>@endif
+                                        Liters to Deliver @if($i === 1)<span class="text-primary">*</span>@endif
                                     </label>
                                     <input type="number" name="liters[{{ $i }}]"
                                         placeholder="Enter liters" min="1"
-                                        class="fuel-liters w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5757]"
+                                        class="fuel-liters w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                                         {{ $i === 1 ? 'required' : '' }}>
                                 </div>
                             </div>
@@ -111,14 +111,14 @@
                     </div>
 
                     <button type="submit"
-                            class="w-full bg-[#FF5757] text-white py-3 rounded-full hover:bg-[#ff4040] transition font-semibold text-lg mt-6">
+                            class="w-full bg-primary text-white py-3 rounded-full hover:bg-[#ff4040] transition font-semibold text-lg mt-6">
                         Submit
                     </button>
                 </form>
             </div>
         </div>
 
-        <footer class="bg-[#FF5757] py-4 fixed bottom-0 w-full">
+        <footer class="bg-primary py-4 fixed bottom-0 w-full">
             <p class="text-center text-white">© 2026 Aaron Gas Station. All Rights Reserved.</p>
         </footer>
     </div>

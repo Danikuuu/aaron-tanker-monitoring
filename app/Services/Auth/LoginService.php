@@ -20,10 +20,10 @@ class LoginService
 
     public function login(array $data): void
     {
-        // 1️⃣ Verify reCAPTCHA
+        // Verify reCAPTCHA
         $this->verifyRecaptcha($data['g-recaptcha-response']);
 
-        // 2️⃣ Check user exists
+        // Check user exists
         $user = $this->loginRepository->findByEmail($data['email']);
 
         if (!$user) {
@@ -44,7 +44,7 @@ class LoginService
             ]);
         }
 
-        // 3️⃣ Attempt authentication
+        // Attempt authentication
         if (!Auth::attempt([
             'email'    => $data['email'],
             'password' => $data['password'],
@@ -54,7 +54,7 @@ class LoginService
             ]);
         }
 
-        // 4️⃣ Regenerate session
+        // Regenerate session
     }
 
     private function verifyRecaptcha(string $token): void

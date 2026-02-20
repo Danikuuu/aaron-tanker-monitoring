@@ -10,6 +10,9 @@ class ApprovalController extends Controller
 {
     public function __construct(protected ApprovalService $approvalService) {}
 
+    /**
+     * list all staff members with their approval status, ordered by pending first, then approved, then blocked, and finally by creation date.
+     */
     public function index()
     {
         $staff = User::where('role', 'staff')
@@ -24,6 +27,9 @@ class ApprovalController extends Controller
         return view('admin.staff-management', compact('staff'));
     }
 
+    /**
+     * Approve a pending staff member. Only users with 'admin' role can perform this action.
+     */
     public function approve(Request $request, int $staffId)
     {
         try {
@@ -34,6 +40,9 @@ class ApprovalController extends Controller
         }
     }
 
+    /**
+     * Block a staff member. Only users with 'admin' role can perform this action.
+     */
     public function block(int $staffId)
     {
         try {
@@ -44,6 +53,9 @@ class ApprovalController extends Controller
         }
     }
 
+    /**
+     * Unblock a staff member. Only users with 'admin' role can perform this action.
+     */
     public function unblock(int $staffId)
     {
         try {
@@ -54,6 +66,9 @@ class ApprovalController extends Controller
         }
     }
 
+    /**
+     * Delete a staff member. Only users with 'admin' role can perform this action.
+     */
     public function destroy(int $staffId)
     {
         try {

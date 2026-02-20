@@ -38,11 +38,9 @@ class LoginController extends Controller
             return redirect()->route('otp')->with('success', 'OTP sent to your email.');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // ✅ Preserves specific messages like "pending approval"
             return back()->withErrors($e->errors())->withInput();
 
         } catch (\Exception $e) {
-            // Generic fallback for unexpected errors
             return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
         }
     }
@@ -52,7 +50,7 @@ class LoginController extends Controller
      */
     public function verifyOtp(OTPRequest $request)
     {
-        $enteredOtp = implode('', $request->otp); // 4 input boxes
+        $enteredOtp = implode('', $request->otp);
 
         try {
             $payload = $this->otpService->verify('login', $enteredOtp);

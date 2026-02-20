@@ -12,13 +12,17 @@ class PasswordResetController extends Controller
         protected PasswordResetService $passwordResetService
     ) {}
 
-    // Show the forgot password form
+    /**
+     * Show the form to request a password reset link.
+     */
     public function create()
     {
         return view('admin.admin-password-reset');
     }
 
-    // Send the reset link email
+    /**
+     * Handle the form submission to send a password reset link to the user's email.
+     */
     public function store(PasswordResetRequest $request)
     {
         try {
@@ -35,13 +39,22 @@ class PasswordResetController extends Controller
         }
     }
 
-    // Show the new password form
+    /**
+     * Show the form to enter a new password, accessed via the token in the reset link.
+      * Validates the token and email before showing the form.
+      * If token is invalid or expired, shows an error message.
+      * The form submits to the update() method to save the new password.
+     */
     public function edit(string $token)
     {
         return view('auth.new-password', ['token' => $token]);
     }
 
-    // Save the new password
+    /**
+     * Handle the submission of the new password form. Validates the token, email, and new password.
+      * If validation passes, updates the user's password and redirects to login with success message.
+      * If validation fails (e.g., invalid token, password mismatch), returns back with error messages.
+     */
     public function update(NewPasswordRequest $request)
     {
         try {
