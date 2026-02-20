@@ -169,6 +169,7 @@ class OtpController extends Controller
      */
     private function redirectByRole($user)
     {
+        // dd($user);
         if ($user->role === 'staff') {
             if ($user->isPending()) {
                 Auth::logout();
@@ -183,9 +184,14 @@ class OtpController extends Controller
             return redirect()->route('staff.fuel-supply');
         }
 
-        if ($user->role === 'admin' || $user->role === 'super_admin') {
+        if ($user->role === 'admin') {
             return redirect()->route('admin.overview');
+        } 
+        
+        if ($user->role === 'super_admin') {
+            return redirect()->route('super_admin.overview');
         }
+        
 
         Auth::logout();
         return redirect()->route('login')

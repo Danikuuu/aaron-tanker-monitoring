@@ -1,4 +1,4 @@
-@extends('admin.layout.app')
+@extends('super_admin.layout.app')
 
 @section('title', 'BR Receipt Builder')
 
@@ -340,7 +340,7 @@
     });
 
     function fetchNextReceiptNumber() {
-        fetch('{{ route("admin.br-receipt.next-number") }}')
+        fetch('{{ route("super_admin.br-receipt.next-number") }}')
             .then(res => res.json())
             .then(data => {
                 document.getElementById('f_receipt_no').value = data.receipt_no;
@@ -560,7 +560,7 @@
             fuels: fuels
         };
 
-        return fetch('{{ route("admin.br-receipt.store") }}', {
+        return fetch('{{ route("super_admin.br-receipt.store") }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

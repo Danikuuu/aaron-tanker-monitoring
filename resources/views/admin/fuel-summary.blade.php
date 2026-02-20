@@ -9,7 +9,7 @@
     <div class="grid grid-cols-4 gap-6">
         @foreach(['diesel' => 'Diesel', 'premium' => 'Premium', 'unleaded' => 'Unleaded', 'methanol' => 'Methanol'] as $type => $label)
         <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-gray-600 text-sm mb-2">{{ $label }}</h3>
+            <h3 class="font-bold text-lg mb-2">{{ $label }}</h3>
             <p class="text-primary text-3xl font-bold">
                 {{ number_format($stocks[$type]->liters ?? 0, 2) }} L
             </p>
@@ -19,24 +19,56 @@
 
     {{-- Overall Total --}}
     <div class="bg-white rounded-lg shadow p-6 flex items-center justify-between">
-        <h3 class="text-gray-600 font-semibold">Overall Total Fuel</h3>
+        <h3 class="font-bold text-lg">Overall Total Fuel</h3>
         <p class="text-primary text-3xl font-bold">
             {{ number_format($stocks->sum('liters'), 2) }} L
         </p>
     </div>
 
+        {{-- Filters --}}
+    <form method="GET" action="{{ route('admin.fuel-summary') }}" class="grid grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Search</label>
+            <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Tanker no., driver, recorded by"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Date From</label>
+            <input type="date" name="date_from" value="{{ $filters['date_from'] ?? '' }}"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Date To</label>
+            <input type="date" name="date_to" value="{{ $filters['date_to'] ?? '' }}"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+        </div>
+        <div class="col-span-4 flex gap-3 justify-end">
+            <a href="{{ route('admin.fuel-summary') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition">Clear</a>
+            <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition text-sm">Filter</button>
+        </div>
+    </form>
+
     {{-- Fuel Arrival Summary --}}
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Fuel Arrival Summary</h2>
-            <a href="{{ route('admin.fuel-summary.export.arrivals') }}"
-               class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition text-sm flex items-center gap-2">
+                <div class="flex gap-2">
+                <a href="{{ route('admin.fuel-summary.export.arrivals', request()->query()) }}"
+                    class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition text-sm flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 Export CSV
             </a>
+            <a href="{{ route('admin.fuel-summary.export.arrivals.pdf', request()->query()) }}"
+               class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-3.866 3.582-7 8-7v14c-4.418 0-8-3.134-8-7z"/>
+                </svg>
+                Export PDF
+            </a>
+            </div>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -139,14 +171,23 @@
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Fuel Departure Summary</h2>
-            <a href="{{ route('admin.fuel-summary.export.departures') }}"
-               class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition text-sm flex items-center gap-2">
+                <div class="flex gap-2">
+                <a href="{{ route('admin.fuel-summary.export.departures', request()->query()) }}"
+                    class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition text-sm flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 Export CSV
             </a>
+            <a href="{{ route('admin.fuel-summary.export.departures.pdf', request()->query()) }}"
+               class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-3.866 3.582-7 8-7v14c-4.418 0-8-3.134-8-7z"/>
+                </svg>
+                Export PDF
+            </a>
+            </div>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">

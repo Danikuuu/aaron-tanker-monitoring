@@ -1,4 +1,4 @@
-@extends('admin.layout.app')
+@extends('super_admin.layout.app')
 
 @section('title', 'Payment Ledger')
 
@@ -53,7 +53,7 @@
     @if($receipts->isEmpty())
         <div class="p-10 text-center text-gray-400 text-sm">
             No BR Receipts saved yet. Generate one from the
-            <a href="{{ route('admin.br-receipt') }}" class="text-[#FF5757] underline">BR Receipt Builder</a>.
+            <a href="{{ route('super_admin.br-receipt') }}" class="text-[#FF5757] underline">BR Receipt Builder</a>.
         </div>
     @else
         <div class="overflow-x-auto">
@@ -119,7 +119,7 @@
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <a href="{{ route('admin.br-receipt-payments.show', $receipt->id) }}"
+                                <a href="{{ route('super_admin.br-receipt-payments.show', $receipt->id) }}"
                                    class="inline-flex items-center gap-1 text-xs text-[#FF5757] hover:underline font-semibold">
                                     View / Pay
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

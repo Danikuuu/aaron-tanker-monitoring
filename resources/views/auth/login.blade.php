@@ -2,57 +2,81 @@
 
 @section('content')
 
+<style>
+    /* Scale down reCAPTCHA on small screens */
+    @media (max-width: 360px) {
+        .g-recaptcha {
+            transform: scale(0.85);
+            transform-origin: center top;
+        }
+    }
+</style>
+
+{{-- Logo --}}
 <div class="text-center mb-8">
-    <img src="{{ asset('images/AARON.png') }}" class="mx-auto mb-4 mix-blend-">
+    <img src="{{ asset('images/aaron-auth.png') }}"
+         class="mx-auto w-auto"
+         style="height: clamp(80px, 20vw, 144px);">
 </div>
 
-        @error('email')
-            <p class="text-primary text-sm mt-1">{{ $message }}</p>
-        @enderror
+{{-- Email error --}}
+@error('email')
+    <p class="text-primary text-sm mb-3">{{ $message }}</p>
+@enderror
 
-<form method="POST" action="{{ route('login.attempt') }}" class="space-y-5">
+<form method="POST" action="{{ route('login.attempt') }}" class="space-y-4">
     @csrf
 
-    <!-- Username -->
+    {{-- Email --}}
     <div>
-        <input type="email" name="email" placeholder="Email"
-            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:outline-none">
+        <input type="email" name="email"
+               placeholder="Email"
+               value="{{ old('email') }}"
+               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:outline-none text-sm"
+               autocomplete="email">
     </div>
 
-    <!-- Password -->
+    {{-- Password --}}
     <div>
-        <input type="password" name="password" placeholder="Password"
-            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:outline-none">
+        <input type="password" name="password"
+               placeholder="Password"
+               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:outline-none text-sm"
+               autocomplete="current-password">
     </div>
 
-    <div class="flex justify-between items-center text-sm">
-        <label class="flex items-center gap-2">
-            <input type="checkbox" class="rounded border-gray-300">
-            Remember Me
+    {{-- Remember me + Forgot password --}}
+    <div class="flex justify-between items-center text-sm flex-wrap gap-y-2">
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" name="remember"
+                   class="rounded border-gray-300 accent-primary">
+            <span class="text-gray-600">Remember Me</span>
         </label>
-
-        <a href="{{ route('password.forgot.show') }}" class="text-primary hover:underline">Forgot password</a>
+        <a href="{{ route('password.forgot.show') }}"
+           class="text-primary hover:underline">
+            Forgot password?
+        </a>
     </div>
 
-    <!-- Captcha Placeholder -->
-    <div class="flex items-center justify-center rounded-lg text-cente">
-        <div class="g-recaptcha" 
-            data-sitekey="{{ config('services.recaptcha.site_key') }}">
+    {{-- reCAPTCHA --}}
+    <div class="flex flex-col items-center gap-1">
+        <div class="g-recaptcha"
+             data-sitekey="{{ config('services.recaptcha.site_key') }}">
         </div>
-
         @error('g-recaptcha-response')
-            <p class="text-primary text-sm mt-2">{{ $message }}</p>
+            <p class="text-primary text-sm">{{ $message }}</p>
         @enderror
     </div>
 
+    {{-- Submit --}}
     <button type="submit"
-        class="w-full bg-primary hover:bg-darkred text-white py-3 rounded-full font-semibold transition">
+            class="w-full bg-primary hover:bg-darkred text-white py-3 rounded-full font-semibold transition text-sm sm:text-base">
         Login
     </button>
 
-    <p class="text-center text-sm mt-4">
-        Don’t have an account?
-        <a href="{{ route('register') }}" class="text-primary font-medium">Sign Up</a>
+    {{-- Sign up link --}}
+    <p class="text-center text-sm text-gray-500">
+        Don't have an account?
+        <a href="{{ route('register') }}" class="text-primary font-semibold hover:underline">Sign Up</a>
     </p>
 </form>
 

@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="text-center mb-8">
-    <img src="{{ asset('images/AARON.png') }}" class="mx-auto mb-4">
+    <img src="{{ asset('images/aaron-auth.png') }}" class="mx-auto h-36 mb-4">
 </div>
 
 <div class="text-center mb-6">

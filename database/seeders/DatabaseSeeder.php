@@ -29,6 +29,8 @@ class DatabaseSeeder extends Seeder
         $this->call(FuelOperationsSeeder::class);
 
         
-         $this->call(DemoDataSeeder::class);
+        $this->call(DemoDataSeeder::class);
+
+        $this->call(SuperAdminSeeder::class);
     }
 }

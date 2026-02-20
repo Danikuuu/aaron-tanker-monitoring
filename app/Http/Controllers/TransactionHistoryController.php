@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Requests\Admin\TransactionHistoryRequest;
 use App\Services\Admin\TransactionHistoryService;
+use Illuminate\Support\Facades\Auth;
 
 class TransactionHistoryController extends Controller
 {
@@ -19,7 +20,35 @@ class TransactionHistoryController extends Controller
     {
         $data = $this->transactionHistoryService->getTransactions($request);
 
-        return view('admin.transaction-history', $data);
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return view('admin.transaction-history', $data);
+        }
+
+        return view('super_admin.transaction-history', $data);
+    }
+
+    /**
+     * Return JSON details for a single transaction (arrival or departure).
+     */
+    public function show(string $type, int $id)
+    {
+        $transaction = $this->transactionHistoryService->getTransaction($type, $id);
+
+        if (! $transaction) {
+            return response()->json(['message' => 'Transaction not found'], 404);
+        }
+
+        return response()->json($transaction);
+    }
+
+    /**
+     * Export transactions to PDF based on current filters.
+     */
+    public function exportPdf(TransactionHistoryRequest $request)
+    {
+        return $this->transactionHistoryService->exportPdf($request);
     }
 
     /**

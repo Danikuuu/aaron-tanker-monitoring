@@ -31,7 +31,7 @@
                   'unleaded' => ['label' => 'Unleaded Arrived', 'color' => 'text-blue-600'],
                   'methanol' => ['label' => 'Methanol Arrived', 'color' => 'text-purple-600']] as $type => $cfg)
         <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-            <p class="text-sm text-gray-500 mb-1">{{ $cfg['label'] }}</p>
+            <p class="font-bold text-lg mb-1">{{ $cfg['label'] }}</p>
             <p class="text-2xl font-bold {{ $cfg['color'] }}">
                 {{ number_format($arrivalTotals[$type] ?? 0, 2) }} L
             </p>
@@ -46,7 +46,7 @@
                   'unleaded' => ['label' => 'Unleaded Dispatched', 'color' => 'text-blue-600'],
                   'methanol' => ['label' => 'Methanol Used (Mix)', 'color' => 'text-purple-600']] as $type => $cfg)
         <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-            <p class="text-sm text-gray-500 mb-1">{{ $cfg['label'] }}</p>
+            <p class="font-bold text-lg mb-1">{{ $cfg['label'] }}</p>
             <p class="text-2xl font-bold {{ $cfg['color'] }}">
                 @if($type === 'methanol')
                     {{ number_format($departureTotals->sum('total_methanol'), 2) }} L

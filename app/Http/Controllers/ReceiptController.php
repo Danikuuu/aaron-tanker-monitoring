@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\Admin\ReceiptService;
+use Illuminate\Support\Facades\Auth;
 
 class ReceiptController extends Controller
 {
@@ -19,6 +20,12 @@ class ReceiptController extends Controller
     public function show(int $id)
     {
         $data = $this->receiptService->getReceiptData($id);
+
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return view('admin.receipt', $data);
+        }
 
         return view('admin.receipt', $data);
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Requests\Admin\AnalyticsFilterRequest;
 use App\Services\Admin\AnalyticsService;
+use Illuminate\Support\Facades\Auth;
 
 class AnalyticsController extends Controller
 {
@@ -20,8 +21,14 @@ class AnalyticsController extends Controller
         $data = $this->analyticsService->getAnalyticsData(
             $request->period()
         );
+        
+        $user = Auth::user();
 
-        return view('admin.analytics', $data);
+        if ($user->role === 'admin') {
+            return view('admin.analytics', $data);
+        }
+
+        return view('super_admin.analytics', $data);
     }
 
     /**

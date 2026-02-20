@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Admin\BrReceiptService;
 use App\Requests\Admin\StoreBrReceiptRequest;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class BrReceiptController extends Controller
 {
@@ -20,7 +21,13 @@ class BrReceiptController extends Controller
     {
         $departures = $this->service->getDepartures();
 
-        return view('admin.receipt.br-receipt', compact('departures'));
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return view('admin.receipt.br-receipt', compact('departures'));
+        }
+
+        return view('super_admin.receipt.br-receipt', compact('departures'));
     }
 
     /**

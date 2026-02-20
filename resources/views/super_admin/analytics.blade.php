@@ -1,4 +1,4 @@
-@extends('admin.layout.app')
+@extends('super_admin.layout.app')
 
 @section('title', 'Analytics')
 
@@ -8,7 +8,7 @@
     {{-- Filter Bar --}}
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold">Analytics</h1>
-        <form method="GET" action="{{ route('admin.analytics') }}" class="flex items-center gap-3">
+        <form method="GET" action="{{ route('super_admin.analytics') }}" class="flex items-center gap-3">
             <label class="text-sm font-medium text-gray-600">Period:</label>
             <div class="flex rounded-lg border border-gray-300 overflow-hidden text-sm">
                 @foreach(['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly', 'yearly' => 'Yearly'] as $value => $label)
@@ -31,7 +31,7 @@
                   'unleaded' => ['label' => 'Unleaded Arrived', 'color' => 'text-blue-600'],
                   'methanol' => ['label' => 'Methanol Arrived', 'color' => 'text-purple-600']] as $type => $cfg)
         <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-            <p class="text-sm text-gray-500 mb-1">{{ $cfg['label'] }}</p>
+            <p class="font-bold text-lg mb-1">{{ $cfg['label'] }}</p>
             <p class="text-2xl font-bold {{ $cfg['color'] }}">
                 {{ number_format($arrivalTotals[$type] ?? 0, 2) }} L
             </p>
@@ -46,7 +46,7 @@
                   'unleaded' => ['label' => 'Unleaded Dispatched', 'color' => 'text-blue-600'],
                   'methanol' => ['label' => 'Methanol Used (Mix)', 'color' => 'text-purple-600']] as $type => $cfg)
         <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-            <p class="text-sm text-gray-500 mb-1">{{ $cfg['label'] }}</p>
+            <p class="font-bold text-lg mb-1">{{ $cfg['label'] }}</p>
             <p class="text-2xl font-bold {{ $cfg['color'] }}">
                 @if($type === 'methanol')
                     {{ number_format($departureTotals->sum('total_methanol'), 2) }} L
@@ -62,7 +62,7 @@
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-xl font-semibold">Fuel Tanker Arrival</h2>
-            <a href="{{ route('admin.analytics.export', ['type' => 'arrival', 'period' => $period]) }}"
+            <a href="{{ route('super_admin.analytics.export', ['type' => 'arrival', 'period' => $period]) }}"
                class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition text-sm flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -80,7 +80,7 @@
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-xl font-semibold">Fuel Tanker Departure</h2>
-            <a href="{{ route('admin.analytics.export', ['type' => 'departure', 'period' => $period]) }}"
+            <a href="{{ route('super_admin.analytics.export', ['type' => 'departure', 'period' => $period]) }}"
                class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition text-sm flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

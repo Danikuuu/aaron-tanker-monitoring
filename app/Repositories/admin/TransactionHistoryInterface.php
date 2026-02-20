@@ -20,4 +20,6 @@ interface TransactionHistoryInterface
         string $dateFrom,
         string $dateTo
     ): \Illuminate\Support\Collection;
+
+    public function getTransaction(string $type, int $id);
 }

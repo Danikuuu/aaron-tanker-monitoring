@@ -9,11 +9,11 @@ interface FuelSummaryInterface
 {
     public function getFuelStocks(): Collection;
 
-    public function getPaginatedArrivals(int $perPage): LengthAwarePaginator;
+    public function getPaginatedArrivals(int $perPage, array $filters = []): LengthAwarePaginator;
 
-    public function getPaginatedDepartures(int $perPage): LengthAwarePaginator;
+    public function getPaginatedDepartures(int $perPage, array $filters = []): LengthAwarePaginator;
 
-    public function getArrivalExportRows(): Collection;
+    public function getArrivalExportRows(array $filters = []): Collection;
 
-    public function getDepartureExportRows(): Collection;
+    public function getDepartureExportRows(array $filters = []): Collection;
 }

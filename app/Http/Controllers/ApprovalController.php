@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Services\Auth\ApprovalService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ApprovalController extends Controller
 {
@@ -24,7 +25,13 @@ class ApprovalController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('admin.staff-management', compact('staff'));
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return view('admin.staff-management', compact('staff'));
+        }
+
+        return view('super_admin.staff-management', compact('staff'));
     }
 
     /**

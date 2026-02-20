@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\Admin\OverviewService;
+use Illuminate\Support\Facades\Auth;
 
 class OverviewController extends Controller
 {
@@ -18,6 +19,12 @@ class OverviewController extends Controller
     {
         $data = $this->overviewService->getDashboardData();
 
-        return view('admin.overview', $data);
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return view('admin.overview', $data);
+        }
+
+        return view('super_admin.overview', $data);
     }
 }

@@ -21,9 +21,9 @@ class StaffManagementController extends Controller
             role:      $request->role,
         );
 
-        AuditLog::record('Staff Created', "Admin manually created a {$user->role} account: {$user->email}", $user);
+        AuditLog::record('Staff Created', "Super Admin manually created a {$user->role} account: {$user->email}", $user);
 
-        return redirect()->route('admin.staff-management')
+        return redirect()->route('super_admin.staff-management')
             ->with('success', ucfirst($request->role) . ' account created successfully.');
     }
 }

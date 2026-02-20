@@ -1,10 +1,9 @@
-@extends('admin.layout.app')
+@extends('super_admin.layout.app')
 
 @section('title', 'Dashboard Overview')
 
 @section('content')
 <div class="space-y-6">
-
     {{-- Fuel Stocks --}}
     <div class="font-bold text-2xl">Fuel Stocks</div>
     <div class="grid grid-cols-4 gap-6">

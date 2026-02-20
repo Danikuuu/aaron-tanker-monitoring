@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Requests\Admin\StoreBrReceiptPaymentRequest;
 use App\Services\Admin\BrReceiptPaymentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BrReceiptPaymentController extends Controller
 {
@@ -19,7 +20,12 @@ class BrReceiptPaymentController extends Controller
     public function index()
     {
         $receipts = $this->service->getAllReceipts();
-        return view('admin.receipt.br-receipt-payment-index', compact('receipts'));
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return view('admin.receipt.br-receipt-payment-index', compact('receipts'));
+        }
+        return view('super_admin.receipt.br-receipt-payment-index', compact('receipts'));
     }
 
     /**
@@ -28,6 +34,11 @@ class BrReceiptPaymentController extends Controller
     public function show(int $id)
     {
         $receipt = $this->service->findReceipt($id);
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return view('admin.receipt.br-receipt-payment-show', compact('receipt'));
+        }
         return view('admin.receipt.br-receipt-payment-show', compact('receipt'));
     }
 
@@ -39,8 +50,16 @@ class BrReceiptPaymentController extends Controller
         $receipt = $this->service->findReceipt($id);
         $this->service->upsertPayment($receipt, $request->validated());
 
-        return redirect()
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return redirect()
             ->route('admin.br-receipt-payments.show', $id)
+            ->with('success', 'Payment record saved successfully.');
+        }
+
+        return redirect()
+            ->route('super_admin.br-receipt-payments.show', $id)
             ->with('success', 'Payment record saved successfully.');
     }
 }

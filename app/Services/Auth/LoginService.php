@@ -54,7 +54,7 @@ class LoginService
             ]);
         }
 
-        // Regenerate session
+        session()->regenerate();// Regenerate session
     }
 
     private function verifyRecaptcha(string $token): void

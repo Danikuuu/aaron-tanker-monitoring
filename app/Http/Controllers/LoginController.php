@@ -62,6 +62,8 @@ class LoginController extends Controller
                 return redirect()->route('staff.fuel-supply');
             } elseif ($user->role === 'admin') {
                 return redirect()->route('admin.overview');
+            } elseif ($user->role === 'super_admin') {
+                return redirect()->route('super_admin.overview');
             }
 
             Auth::logout();

@@ -130,6 +130,44 @@ class TransactionHistoryRepository implements TransactionHistoryInterface
             ->get();
     }
 
+    public function getTransaction(string $type, int $id)
+    {
+        if ($type === 'arrival') {
+            $row = DB::table('tanker_arrivals')
+                ->join('users', 'users.id', '=', 'tanker_arrivals.recorded_by')
+                ->selectRaw("tanker_arrivals.id, 'arrival' as type, tanker_arrivals.tanker_number, NULL as driver, tanker_arrivals.arrival_date as transaction_date, users.first_name || ' ' || users.last_name as recorded_by, tanker_arrivals.created_at")
+                ->where('tanker_arrivals.id', $id)
+                ->first();
+
+            if (! $row) return null;
+
+            $fuels = DB::table('tanker_arrival_fuels')
+                ->where('tanker_arrival_id', $id)
+                ->get();
+
+            $row->fuels = $fuels;
+
+            return $row;
+        }
+
+        // departure
+        $row = DB::table('tanker_departures')
+            ->join('users', 'users.id', '=', 'tanker_departures.recorded_by')
+            ->selectRaw("tanker_departures.id, 'departure' as type, tanker_departures.tanker_number, tanker_departures.driver, tanker_departures.departure_date as transaction_date, users.first_name || ' ' || users.last_name as recorded_by, tanker_departures.created_at")
+            ->where('tanker_departures.id', $id)
+            ->first();
+
+        if (! $row) return null;
+
+        $fuels = DB::table('tanker_departure_fuels')
+            ->where('tanker_departure_id', $id)
+            ->get();
+
+        $row->fuels = $fuels;
+
+        return $row;
+    }
+
     // Attach fuel rows to each paginated transaction item
     private function hydrateFuels(\Illuminate\Pagination\LengthAwarePaginator $paginator): void
     {

@@ -1,5 +1,5 @@
-<!-- resources/views/admin/create-admin.blade.php -->
-@extends('admin.layout.app')
+<!-- resources/views/admin/create-super_blade.php -->
+@extends('super_layout.app')
 
 @section('title', 'Create New Admin')
 
@@ -34,7 +34,7 @@
             <h2 class="text-2xl font-bold">Create New Admin</h2>
         </div>
 
-        <form method="POST" action="{{ route('admin.store') }}" class="space-y-4">
+        <form method="POST" action="{{ route('super_store') }}" class="space-y-4">
             @csrf
             <div class="grid grid-cols-2 gap-4">
                 <div>

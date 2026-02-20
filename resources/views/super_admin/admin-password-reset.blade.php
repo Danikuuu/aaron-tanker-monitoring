@@ -1,5 +1,5 @@
 <!-- resources/views/admin/password-reset.blade.php -->
-@extends('admin.layout.app')
+@extends('super_admin.layout.app')
 
 @section('title', 'Password Reset')
 
@@ -24,7 +24,7 @@
             <p class="text-gray-600">Enter your email to reset your password.</p>
         </div>
 
-        <form method="POST" action="{{ route('admin.password.email') }}">
+        <form method="POST" action="{{ route('super_admin.password.email') }}">
             @csrf
             <div class="mb-6">
                 <label class="block text-sm font-medium mb-2">

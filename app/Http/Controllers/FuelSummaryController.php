@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\Admin\FuelSummaryService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class FuelSummaryController extends Controller
 {
@@ -14,11 +16,17 @@ class FuelSummaryController extends Controller
     /**
      * Display the fuel summary dashboard with aggregated data on fuel usage, arrivals, and departures.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = $this->fuelSummaryService->getSummaryData();
+        $data = $this->fuelSummaryService->getSummaryData($request->query());
 
-        return view('admin.fuel-summary', $data);
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return view('admin.fuel-summary', $data);
+        }
+
+        return view('super_admin.fuel-summary', $data);
     }
 
     /**
@@ -26,7 +34,7 @@ class FuelSummaryController extends Controller
      */
     public function exportArrivals()
     {
-        return $this->fuelSummaryService->exportArrivals();
+        return $this->fuelSummaryService->exportArrivals(request()->query());
     }
 
     /**
@@ -34,6 +42,16 @@ class FuelSummaryController extends Controller
      */
     public function exportDepartures()
     {
-        return $this->fuelSummaryService->exportDepartures();
+        return $this->fuelSummaryService->exportDepartures(request()->query());
+    }
+
+    public function exportArrivalsPdf(Request $request)
+    {
+        return $this->fuelSummaryService->exportArrivalsPdf($request->query());
+    }
+
+    public function exportDeparturesPdf(Request $request)
+    {
+        return $this->fuelSummaryService->exportDeparturesPdf($request->query());
     }
 }

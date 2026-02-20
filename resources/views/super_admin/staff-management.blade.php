@@ -1,5 +1,5 @@
 <!-- resources/views/admin/staff-management.blade.php -->
-@extends('admin.layout.app')
+@extends('super_admin.layout.app')
 
 @section('title', 'Staff Management')
 
@@ -123,7 +123,7 @@
                                         Approve
                                     </div>
                                 @else
-                                    <form method="POST" action="{{ route('admin.staff.approve', $member->id) }}">
+                                    <form method="POST" action="{{ route('super_admin.staff.approve', $member->id) }}">
                                         @csrf
                                         <button type="submit"
                                                 class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition">
@@ -139,7 +139,7 @@
                                         Block
                                     </div>
                                 @else
-                                    <form method="POST" action="{{ route('admin.staff.block', $member->id) }}">
+                                    <form method="POST" action="{{ route('super_admin.staff.block', $member->id) }}">
                                         @csrf
                                         <button type="submit"
                                                 class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition">
@@ -150,7 +150,7 @@
                                 @endif
 
                                 @if($member->isBlocked())
-                                    <form method="POST" action="{{ route('admin.staff.unblock', $member->id) }}">
+                                    <form method="POST" action="{{ route('super_admin.staff.unblock', $member->id) }}">
                                         @csrf
                                         <button type="submit"
                                                 class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
@@ -161,7 +161,7 @@
 
                                     <div class="border-t border-gray-100"></div>
                                     <form method="POST"
-                                          action="{{ route('admin.staff.delete', $member->id) }}"
+                                          action="{{ route('super_admin.staff.delete', $member->id) }}"
                                           onsubmit="return confirm('Permanently delete {{ $member->first_name }}?')">
                                         @csrf
                                         @method('DELETE')
@@ -266,7 +266,7 @@
             </div>
 
             {{-- Modal Body --}}
-            <form method="POST" action="{{ route('admin.staff.create') }}" class="px-6 py-5 space-y-4">
+            <form method="POST" action="{{ route('super_admin.staff.create') }}" class="px-6 py-5 space-y-4">
                 @csrf
 
                 {{-- Role toggle --}}

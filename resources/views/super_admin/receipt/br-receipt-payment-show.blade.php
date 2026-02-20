@@ -1,4 +1,4 @@
-@extends('admin.layout.app')
+@extends('super_admin.layout.app')
 
 @section('title', 'Payment Details — Nº {{ $receipt->receipt_no }}')
 
@@ -21,7 +21,7 @@
 
 {{-- Back + header --}}
 <div class="mb-5 flex items-center gap-3">
-    <a href="{{ route('admin.br-receipt-payments.index') }}"
+    <a href="{{ route('super_admin.br-receipt-payments.index') }}"
        class="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -239,7 +239,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('admin.br-receipt-payments.upsert', $receipt->id) }}" class="space-y-4">
+            <form method="POST" action="{{ route('super_admin.br-receipt-payments.upsert', $receipt->id) }}" class="space-y-4">
                 @csrf
                 @method('PUT')
 
