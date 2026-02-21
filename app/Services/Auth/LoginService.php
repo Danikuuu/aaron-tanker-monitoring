@@ -106,11 +106,11 @@ class LoginService
         return $user;
     }
 
-    public function loginById(int $userId)
+    public function loginById(int $userId, bool $remember = false)
     {
         $user = $this->loginRepository->findById($userId);
 
-        Auth::login($user);
+        Auth::login($user, $remember);
         session()->regenerate();
 
         AuditLog::record('Login', "User logged in successfully: {$user->email}", $user);

@@ -304,7 +304,7 @@
                         <span class="text-sm xl:text-md">Transaction History</span>
                     </a>
 
-                    <a href="{{ route('admin.password.request') }}"
+                    <a href="{{ route('admin.password.edit') }}"
                        class="flex items-center gap-3 px-4 xl:px-6 py-3 xl:py-4 rounded-lg hover:bg-white hover:text-primary transition
                               {{ request()->routeIs('admin.password-reset') ? 'bg-white text-black' : '' }}">
                         <svg class="w-5 h-5 xl:w-6 xl:h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

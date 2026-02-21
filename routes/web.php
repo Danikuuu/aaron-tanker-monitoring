@@ -4,6 +4,7 @@ use App\Http\Controllers\BrReceiptPaymentController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\ApprovalController;
+use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\BrReceiptController;
 use App\Http\Controllers\FuelSummaryController;
@@ -69,6 +70,9 @@ Route::post('/forgot-password/resend-otp', [ForgotPasswordController::class, 're
 // ===============================
 Route::get('/reset-password',  [ResetPasswordController::class, 'show'])->name('password.reset.show');
 Route::post('/reset-password', [ResetPasswordController::class, 'update'])->name('password.reset.update');
+
+
+Route::view('/privacy-policy', 'terms')->name('privacy.policy');
 
 // ===============================
 // LOGOUT
@@ -139,10 +143,9 @@ Route::middleware([RoleMiddleware::class . ':admin'])->prefix('admin')->group(fu
     // Route::delete('/staff/{staffId}',        [ApprovalController::class, 'destroy'])->name('admin.staff.delete');
 
 
-    Route::get('/forgot-password',  [PasswordResetController::class, 'create'])->name('admin.password.request');
-    Route::post('/forgot-password', [PasswordResetController::class, 'store'])->name('admin.password.email');
-    Route::get('/reset-password/{token}', [PasswordResetController::class, 'edit'])->name('admin.password.reset');
-    Route::post('/reset-password',  [PasswordResetController::class, 'update'])->name('admin.password.update');
+    // Inside your admin middleware group
+    Route::get('/password/reset',  [ChangePasswordController::class, 'edit'])  ->name('admin.password.edit');
+    Route::put('/password/update', [ChangePasswordController::class, 'update'])->name('admin.password.update');
 
 
     Route::get('/admin/notifications', [NotificationController::class, 'index'])
@@ -165,11 +168,10 @@ Route::middleware([RoleMiddleware::class . ':super_admin'])->prefix('super_admin
     // ===============================
     // BR Receipt Management
     // ===============================
-    Route::get('/br-receipt', [BrReceiptController::class, 'index'])->name('super_admin.br-receipt');
-
-    Route::post('/br-receipt', [BrReceiptController::class, 'store'])->name('super_admin.br-receipt.store');
-    
+    Route::get('/br-receipt',             [BrReceiptController::class, 'index'])               ->name('super_admin.br-receipt');
+    Route::post('/br-receipt',            [BrReceiptController::class, 'store'])               ->name('super_admin.br-receipt.store');
     Route::get('/br-receipt/next-number', [BrReceiptController::class, 'getNextReceiptNumber'])->name('super_admin.br-receipt.next-number');
+    Route::get('/br-receipt/{id}',        [BrReceiptController::class, 'show'])                ->name('super_admin.br-receipt.show');
 
     Route::get('/br-receipt-payments', [BrReceiptPaymentController::class, 'index'])
         ->name('super_admin.br-receipt-payments.index');
@@ -186,8 +188,9 @@ Route::middleware([RoleMiddleware::class . ':super_admin'])->prefix('super_admin
     // ===============================
     Route::get('/overview', [OverviewController::class, 'index'])->name('super_admin.overview');
 
-    Route::get('/analytics',        [AnalyticsController::class, 'index'])->name('super_admin.analytics');
-    Route::get('/analytics/export', [AnalyticsController::class, 'export'])->name('super_admin.analytics.export');
+    Route::get('/analytics',              [AnalyticsController::class, 'index'])->name('super_admin.analytics');
+    Route::get('/analytics/export/csv',   [AnalyticsController::class, 'exportCsv'])->name('super_admin.analytics.export.csv');
+    Route::get('/analytics/export/pdf',   [AnalyticsController::class, 'exportPdf'])->name('super_admin.analytics.export.pdf');
 
     Route::get('/fuel-summary',                    [FuelSummaryController::class, 'index'])->name('super_admin.fuel-summary');
     Route::get('/fuel-summary/export/arrivals',    [FuelSummaryController::class, 'exportArrivals'])->name('super_admin.fuel-summary.export.arrivals');
@@ -213,10 +216,9 @@ Route::middleware([RoleMiddleware::class . ':super_admin'])->prefix('super_admin
     Route::delete('/staff/{staffId}',        [ApprovalController::class, 'destroy'])->name('super_admin.staff.delete');
 
 
-    Route::get('/forgot-password',  [PasswordResetController::class, 'create'])->name('super_admin.password.request');
-    Route::post('/forgot-password', [PasswordResetController::class, 'store'])->name('super_admin.password.email');
-    Route::get('/reset-password/{token}', [PasswordResetController::class, 'edit'])->name('super_admin.password.reset');
-    Route::post('/reset-password',  [PasswordResetController::class, 'update'])->name('super_admin.password.update');
+    // Inside your admin middleware group
+    Route::get('/password/reset',  [ChangePasswordController::class, 'edit'])  ->name('super_admin.password.edit');
+    Route::put('/password/update', [ChangePasswordController::class, 'update'])->name('super_admin.password.update');
 
      Route::get('/admin/notifications', [NotificationController::class, 'index'])
     ->name('super_admin.notifications');

@@ -264,9 +264,9 @@
                 </div>
 
                 <nav class="px-3 xl:px-4 space-y-1">
-                    <a href="{{ route('admin.overview') }}"
+                    <a href="{{ route('super_admin.overview') }}"
                        class="flex items-center gap-3 px-4 xl:px-6 py-3 xl:py-4 rounded-lg hover:bg-white hover:text-primary transition
-                              {{ request()->routeIs('admin.overview') ? 'bg-white text-black' : '' }}">
+                              {{ request()->routeIs('super_admin.overview') ? 'bg-white text-black' : '' }}">
                         <svg class="w-5 h-5 xl:w-6 xl:h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
@@ -274,9 +274,9 @@
                         <span class="text-sm xl:text-md">Overview</span>
                     </a>
 
-                    <a href="{{ route('admin.analytics') }}"
+                    <a href="{{ route('super_admin.analytics') }}"
                        class="flex items-center gap-3 px-4 xl:px-6 py-3 xl:py-4 rounded-lg hover:bg-white hover:text-primary transition
-                              {{ request()->routeIs('admin.analytics') ? 'bg-white text-black' : '' }}">
+                              {{ request()->routeIs('super_admin.analytics') ? 'bg-white text-black' : '' }}">
                         <svg class="w-5 h-5 xl:w-6 xl:h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
@@ -284,9 +284,9 @@
                         <span class="text-sm xl:text-md">Analytics</span>
                     </a>
 
-                    <a href="{{ route('admin.fuel-summary') }}"
+                    <a href="{{ route('super_admin.fuel-summary') }}"
                        class="flex items-center gap-3 px-4 xl:px-6 py-3 xl:py-4 rounded-lg hover:bg-white hover:text-primary transition
-                              {{ request()->routeIs('admin.fuel-summary') ? 'bg-white text-black' : '' }}">
+                              {{ request()->routeIs('super_admin.fuel-summary') ? 'bg-white text-black' : '' }}">
                         <svg class="w-5 h-5 xl:w-6 xl:h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M3 20V6a2 2 0 012-2h8a2 2 0 012 2v14M3 20h14M8 20v-5h4v5M19 8l2 2v8a1 1 0 01-1 1h-1M17 4l2 2"/>
@@ -294,9 +294,9 @@
                         <span class="text-sm xl:text-md">Fuel Summary</span>
                     </a>
 
-                    <a href="{{ route('admin.transaction-history') }}"
+                    <a href="{{ route('super_admin.transaction-history') }}"
                        class="flex items-center gap-3 px-4 xl:px-6 py-3 xl:py-4 rounded-lg hover:bg-white hover:text-primary transition
-                              {{ request()->routeIs('admin.transaction-history') ? 'bg-white text-black' : '' }}">
+                              {{ request()->routeIs('super_admin.transaction-history') ? 'bg-white text-black' : '' }}">
                         <svg class="w-5 h-5 xl:w-6 xl:h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -304,9 +304,45 @@
                         <span class="text-sm xl:text-md">Transaction History</span>
                     </a>
 
-                    <a href="{{ route('admin.password.request') }}"
+                    {{-- Staff Management --}}
+                    <a href="{{ route('super_admin.staff-management') }}"
                        class="flex items-center gap-3 px-4 xl:px-6 py-3 xl:py-4 rounded-lg hover:bg-white hover:text-primary transition
-                              {{ request()->routeIs('admin.password-reset') ? 'bg-white text-black' : '' }}">
+                              {{ request()->routeIs('super_admin.staff-management') ? 'bg-white text-black' : '' }}">
+                        {{-- Users / people icon --}}
+                        <svg class="w-5 h-5 xl:w-6 xl:h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4 0a4 4 0 100-8 4 4 0 000 8zm6 0a3 3 0 10-6 0"/>
+                        </svg>
+                        <span class="text-sm xl:text-md">Staff Management</span>
+                    </a>
+
+                    {{-- BR Receipt --}}
+                    <a href="{{ route('super_admin.br-receipt') }}"
+                       class="flex items-center gap-3 px-4 xl:px-6 py-3 xl:py-4 rounded-lg hover:bg-white hover:text-primary transition
+                              {{ request()->routeIs('super_admin.br-receipt') ? 'bg-white text-black' : '' }}">
+                        {{-- Receipt / document icon --}}
+                        <svg class="w-5 h-5 xl:w-6 xl:h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                        </svg>
+                        <span class="text-sm xl:text-md">BR Receipt</span>
+                    </a>
+
+                    {{-- Payments --}}
+                    <a href="{{ route('super_admin.br-receipt-payments.index') }}"
+                       class="flex items-center gap-3 px-4 xl:px-6 py-3 xl:py-4 rounded-lg hover:bg-white hover:text-primary transition
+                              {{ request()->routeIs('super_admin.br-receipt-payments.index') ? 'bg-white text-black' : '' }}">
+                        {{-- Credit card / payment icon --}}
+                        <svg class="w-5 h-5 xl:w-6 xl:h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                        </svg>
+                        <span class="text-sm xl:text-md">Payments</span>
+                    </a>
+
+                    <a href="{{ route('super_admin.password.edit') }}"
+                       class="flex items-center gap-3 px-4 xl:px-6 py-3 xl:py-4 rounded-lg hover:bg-white hover:text-primary transition
+                              {{ request()->routeIs('super_admin.password-reset') ? 'bg-white text-black' : '' }}">
                         <svg class="w-5 h-5 xl:w-6 xl:h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
@@ -613,6 +649,6 @@
         setInterval(fetchNotifications, 3000);
     })();
     </script>
-
+@stack('scripts')
 </body>
 </html>

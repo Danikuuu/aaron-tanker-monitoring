@@ -44,9 +44,21 @@ class TankerDepartureService
                 $currentStock = FuelStock::getStock($fuelType);
 
                 if ($currentStock < $pureLiters) {
-                    throw new Exception("Insufficient stock for {$fuelType}. Available: {$currentStock}L");
+                    throw new \RuntimeException(
+                        "Insufficient stock for {$fuelType}. Available: {$currentStock}L"
+                    );
                 }
 
+                if ($methanolLiters > 0) {
+
+                    $methanolStock = FuelStock::getStock('methanol');
+
+                    if ($methanolStock < $methanolLiters) {
+                        throw new \RuntimeException(
+                            "Insufficient stock for methanol. Available: {$methanolStock}L"
+                        );
+                    }
+                }
                 // Save fuel row with only pure fuel
                 $this->repository->addFuel($departure, [
                     'fuel_type' => $fuelType,

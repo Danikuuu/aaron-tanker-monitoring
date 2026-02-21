@@ -343,5 +343,15 @@
         localStorage.removeItem('otp_resend_cooldown_end');
     }
 </script>
+<script>
+    const fuelForm = document.getElementById('fuelForm');
+    const submitBtn = fuelForm.querySelector('button[type="submit"]');
+
+    fuelForm.addEventListener('submit', function() {
+        // Disable the button immediately to prevent multiple clicks
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Verifying...'; // Optional: give user feedback
+    });
+</script>
 
 @endsection

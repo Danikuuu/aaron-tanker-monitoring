@@ -266,6 +266,21 @@
                         </script>
                     @endif
 
+                    @error('stock')
+                        <div class="td-flash flash-error">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
+                    <script>
+                        setTimeout(() => {
+                            document.querySelectorAll('.flash-error').forEach(msg => {
+                                msg.style.opacity = '0';
+                                setTimeout(() => msg.remove(), 500);
+                            });
+                        }, 3000);
+                    </script>
+
                     <form method="POST" action="{{ route('staff.tanker-departure.store') }}" id="fuelForm">
                         @csrf
 
@@ -283,7 +298,7 @@
                             </div>
                             <div class="td-col-2">
                                 <label class="td-label">Departure Date <span class="req">*</span></label>
-                                <input type="date" name="departure_date" required
+                                <input type="date" name="departure_date" required readonly
                                        value="{{ date('Y-m-d') }}" class="td-input">
                             </div>
                         </div>
@@ -504,5 +519,18 @@
         numInput.addEventListener('blur',  () => { syncSliderAndInput(row, numInput); updateRow(row); });
     });
 </script>
+
+<script>
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', () => {
+            const btn = form.querySelector('button[type="submit"]');
+            if(btn) {
+                btn.disabled = true;
+                btn.innerText = 'Submitting...';
+            }
+        });
+    });
+</script>
+
 
 @endsection

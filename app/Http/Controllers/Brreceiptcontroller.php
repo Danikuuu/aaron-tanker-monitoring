@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\BrReceipt;
 use App\Services\Admin\BrReceiptService;
 use App\Requests\Admin\StoreBrReceiptRequest;
 use Illuminate\Http\JsonResponse;
@@ -21,17 +22,21 @@ class BrReceiptController extends Controller
     {
         $departures = $this->service->getDepartures();
 
+        $receipts = BrReceipt::with(['fuels', 'departure'])
+            ->latest()
+            ->paginate(15);
+
         $user = Auth::user();
 
         if ($user->role === 'admin') {
-            return view('admin.receipt.br-receipt', compact('departures'));
+            return view('admin.receipt.br-receipt', compact('departures', 'receipts'));
         }
 
-        return view('super_admin.receipt.br-receipt', compact('departures'));
+        return view('super_admin.receipt.br-receipt', compact('departures', 'receipts'));
     }
 
     /**
-     * Create a new BR Receipt for a departure. Validates input and returns JSON response with success status and receipt number or error message.
+     * Create a new BR Receipt for a departure.
      */
     public function store(StoreBrReceiptRequest $request): JsonResponse
     {
@@ -39,27 +44,57 @@ class BrReceiptController extends Controller
             $receipt = $this->service->createReceipt($request->validated());
 
             return response()->json([
-                'success' => true,
+                'success'    => true,
                 'receipt_no' => $receipt->receipt_no,
-                'message' => 'Receipt saved successfully'
+                'message'    => 'Receipt saved successfully',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to save receipt: ' . $e->getMessage()
+                'message' => 'Failed to save receipt: ' . $e->getMessage(),
             ], 500);
         }
     }
 
     /**
-     * Generate the next available receipt number based on the current date and existing receipts. Returns JSON response with the generated receipt number.
+     * Generate the next available receipt number.
      */
     public function getNextReceiptNumber(): JsonResponse
     {
         $nextNumber = $this->service->generateReceiptNumber();
-        
+
         return response()->json([
-            'receipt_no' => $nextNumber
+            'receipt_no' => $nextNumber,
+        ]);
+    }
+
+    /**
+     * Return JSON data for a single receipt (used by re-download).
+     */
+    public function show(int $id): JsonResponse
+    {
+        $receipt = BrReceipt::with(['fuels', 'departure'])->findOrFail($id);
+
+        return response()->json([
+            'receipt' => [
+                'id'             => $receipt->id,
+                'receipt_no'     => $receipt->receipt_no,
+                'delivered_to'   => $receipt->delivered_to,
+                'address'        => $receipt->address,
+                'tin'            => $receipt->tin,
+                'terms'          => $receipt->terms,
+                'grand_total'    => $receipt->grand_total,
+                'tanker_number'  => $receipt->departure->tanker_number ?? '—',
+                'driver'         => $receipt->departure->driver        ?? '—',
+                'departure_date' => optional($receipt->departure->departure_date)->format('m/d/Y'),
+                'fuels'          => $receipt->fuels->map(fn($f) => [
+                    'fuel_type'  => $f->fuel_type,
+                    'liters'     => (float) $f->liters,
+                    'unit_price' => (float) $f->unit_price,
+                    'amount'     => (float) $f->amount,
+                    'remarks'    => $f->remarks,
+                ]),
+            ],
         ]);
     }
 }

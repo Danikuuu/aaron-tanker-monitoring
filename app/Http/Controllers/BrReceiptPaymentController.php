@@ -39,7 +39,7 @@ class BrReceiptPaymentController extends Controller
         if ($user->role === 'admin') {
             return view('admin.receipt.br-receipt-payment-show', compact('receipt'));
         }
-        return view('admin.receipt.br-receipt-payment-show', compact('receipt'));
+        return view('super_admin.receipt.br-receipt-payment-show', compact('receipt'));
     }
 
     /**

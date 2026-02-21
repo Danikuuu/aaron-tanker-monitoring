@@ -134,5 +134,15 @@
         </div>
     @endif
 </div>
+<script>
+    const fuelForm = document.getElementById('fuelForm');
+    const submitBtn = fuelForm.querySelector('button[type="submit"]');
+
+    fuelForm.addEventListener('submit', function() {
+        // Disable the button immediately to prevent multiple clicks
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Submitting...'; // Optional: give user feedback
+    });
+</script>
 
 @endsection

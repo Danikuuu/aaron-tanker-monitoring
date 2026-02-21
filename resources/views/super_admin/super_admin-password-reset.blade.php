@@ -1,5 +1,5 @@
 <!-- resources/views/admin/password-reset.blade.php -->
-@extends('admin.layout.app')
+@extends('super_admin.layout.app')
 
 @section('title', 'Change Password')
 
@@ -46,7 +46,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('admin.password.update') }}">
+        <form method="POST" action="{{ route('super_admin.password.update') }}">
             @csrf
             @method('PUT')
 
@@ -128,4 +128,15 @@
                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>`;
     }
 </script>
+<script>
+    const fuelForm = document.getElementById('fuelForm');
+    const submitBtn = fuelForm.querySelector('button[type="submit"]');
+
+    fuelForm.addEventListener('submit', function() {
+        // Disable the button immediately to prevent multiple clicks
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Submitting...'; // Optional: give user feedback
+    });
+</script>
+
 @endsection

@@ -20,6 +20,11 @@ class PasswordResetController extends Controller
         return view('admin.admin-password-reset');
     }
 
+    public function superadmin()
+    {
+        return view('super_admin.admin-password-reset');
+    }
+
     /**
      * Handle the form submission to send a password reset link to the user's email.
      */

@@ -22,4 +22,10 @@ class TankerDeparture extends Model
     {
         return $this->belongsTo(User::class, 'recorded_by');
     }
+
+    // ← THIS IS THE MISSING RELATIONSHIP
+    public function brReceipt()
+    {
+        return $this->hasOne(BrReceipt::class, 'tanker_departure_id');
+    }
 }

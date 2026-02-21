@@ -31,6 +31,7 @@ class LoginController extends Controller
 
             $otp = $this->otpService->generate('login', [
                 'user_id' => $user->id,
+                'remember' => $request->boolean('remember'),
             ]);
 
             Mail::to($user->email)->send(new OtpMail($otp));

@@ -137,7 +137,7 @@
                     </div>
                     <div class="ti-col-2">
                         <label class="ti-label">Arrival Date <span class="req">*</span></label>
-                        <input type="date" name="departure_date" required
+                        <input type="date" name="departure_date" required readonly
                                value="{{ date('Y-m-d') }}" class="ti-input">
                     </div>
                 </div>
@@ -247,6 +247,16 @@
             updateSummary();
         });
         row.querySelector('.fuel-liters').addEventListener('input', () => updateSummary());
+    });
+</script>
+<script>
+    const fuelForm = document.getElementById('fuelForm');
+    const submitBtn = fuelForm.querySelector('button[type="submit"]');
+
+    fuelForm.addEventListener('submit', function() {
+        // Disable the button immediately to prevent multiple clicks
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Submitting...'; // Optional: give user feedback
     });
 </script>
 

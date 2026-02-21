@@ -40,9 +40,7 @@
         <input type="checkbox" required>
         <span>
             I Agree with
-            <a href="#" class="text-primary">Privacy</a>
-            and
-            <a href="#" class="text-primary">Policy</a>
+            <a href="{{ route('privacy.policy') }}" class="text-primary">Privacy and Policy</a>
         </span>
     </div>
 
@@ -66,5 +64,15 @@
         <a href="{{ route('login') }}" class="text-primary font-medium">Sign in</a>
     </p>
 </form>
+<script>
+    const fuelForm = document.getElementById('fuelForm');
+    const submitBtn = fuelForm.querySelector('button[type="submit"]');
+
+    fuelForm.addEventListener('submit', function() {
+        // Disable the button immediately to prevent multiple clicks
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Submitting...'; // Optional: give user feedback
+    });
+</script>
 
 @endsection

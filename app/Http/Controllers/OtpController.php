@@ -33,7 +33,10 @@ class OtpController extends Controller
         try {
             if (Session::has('otp.login')) {
                 $payload = $otpService->verify('login', $enteredOtp);
-                $user = $loginService->loginById($payload['user_id']);
+                $user = $loginService->loginById(
+                    $payload['user_id'],
+                    $payload['remember'] ?? false
+                );
                 return $this->redirectByRole($user);
             }
 
