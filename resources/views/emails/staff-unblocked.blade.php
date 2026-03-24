@@ -1,14 +1,32 @@
 <!DOCTYPE html>
 <html>
-<body style="font-family: sans-serif; color: #333; padding: 24px;">
-    <h2>Your Account Has Been Reinstated</h2>
-    <p>Hi {{ $staff->first_name }},</p>
-    <p>
-        Your account has been reinstated and is now pending admin approval.
-        You will receive another email once your account has been fully approved.
-    </p>
-    <p style="margin-top: 24px; font-size: 13px; color: #888;">
-        This is an automated message, please do not reply.
-    </p>
+<head>
+    <meta charset="UTF-8">
+    <title>Account Reinstated</title>
+</head>
+<body style="background-color: #F5F5F5; font-family: Arial, sans-serif; color: #111111; padding: 24px;">
+
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 32px; text-align: center;">
+        
+        <h2 style="color: #FF3B3B; font-size: 24px; font-weight: 600; margin-bottom: 16px;">Account Reinstated</h2>
+        
+        <p style="color: #6B7280; font-size: 16px; margin-bottom: 16px;">
+            Hi {{ $staff->first_name }},
+        </p>
+
+        <p style="color: #6B7280; font-size: 16px; margin-bottom: 16px;">
+            Your account has been reinstated and is now pending admin approval.
+            You will receive another email once your account has been fully approved.
+        </p>
+
+        <p style="color: #6B7280; font-size: 13px; margin-top: 24px;">
+            This is an automated message, please do not reply.
+        </p>
+
+        <p style="color: #6B7280; font-size: 13px; margin-top: 24px;">
+            &copy; {{ date('Y') }} AC Ang Fuel Distribution Services. All rights reserved.
+        </p>
+    </div>
+
 </body>
 </html>

@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
         $superAdmin = User::create([
             'first_name' => 'Super',
             'last_name'  => 'Admin',
-            'email'      => 'superadmin@aaron.com',
+            'email'      => 'superadmin@test.com',
             'password'   => Hash::make('password'),
             'role'       => 'super_admin',
             'status'     => 'approved',
@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
         $admin = User::create([
             'first_name' => 'System',
             'last_name'  => 'Admin',
-            'email'      => 'admin@aaron.com',
+            'email'      => 'admin@test.com',
             'password'   => Hash::make('password'),
             'role'       => 'admin',
             'status'     => 'approved',

@@ -4,34 +4,33 @@ namespace App\Repositories\Admin;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class AnalyticsRepository implements AnalyticsInterface
 {
     /**
-     * Return the start date and SQLite strftime group-by format for a given period.
+     * Return the start date and MySQL DATE_FORMAT group-by format for a given period.
      */
     private function periodMeta(string $period): array
     {
         return match ($period) {
             'daily'   => [
                 'start'  => now()->subDays(30)->startOfDay(),
-                'format' => "%Y-%m-%d",
+                'format' => '%Y-%m-%d',
                 'column' => 'day',
             ],
             'weekly'  => [
                 'start'  => now()->subWeeks(12)->startOfWeek(),
-                'format' => "%Y-W%W",
+                'format' => '%x-W%v',   // ISO year + ISO week number
                 'column' => 'week',
             ],
             'yearly'  => [
                 'start'  => now()->subYears(5)->startOfYear(),
-                'format' => "%Y",
+                'format' => '%Y',
                 'column' => 'year',
             ],
-            default   => [                          // monthly
+            default   => [              // monthly
                 'start'  => now()->subMonths(12)->startOfMonth(),
-                'format' => "%Y-%m",
+                'format' => '%Y-%m',
                 'column' => 'month',
             ],
         };
@@ -45,7 +44,7 @@ class AnalyticsRepository implements AnalyticsInterface
 
         return DB::table('tanker_arrival_fuels')
             ->join('tanker_arrivals', 'tanker_arrivals.id', '=', 'tanker_arrival_fuels.tanker_arrival_id')
-            ->selectRaw("strftime('{$fmt}', tanker_arrivals.arrival_date) as {$col}, fuel_type, SUM(liters) as total")
+            ->selectRaw("DATE_FORMAT(tanker_arrivals.arrival_date, '{$fmt}') as {$col}, fuel_type, SUM(liters) as total")
             ->where('tanker_arrivals.arrival_date', '>=', $start)
             ->groupBy($col, 'fuel_type')
             ->orderBy($col)
@@ -61,7 +60,7 @@ class AnalyticsRepository implements AnalyticsInterface
 
         return DB::table('tanker_departure_fuels')
             ->join('tanker_departures', 'tanker_departures.id', '=', 'tanker_departure_fuels.tanker_departure_id')
-            ->selectRaw("strftime('{$fmt}', tanker_departures.departure_date) as {$col},
+            ->selectRaw("DATE_FORMAT(tanker_departures.departure_date, '{$fmt}') as {$col},
                          fuel_type,
                          SUM(liters) as total,
                          SUM(methanol_liters) as total_methanol,
@@ -112,7 +111,7 @@ class AnalyticsRepository implements AnalyticsInterface
             ->selectRaw("tanker_arrivals.id,
                          tanker_arrivals.tanker_number,
                          tanker_arrivals.arrival_date,
-                         users.first_name || ' ' || users.last_name as recorded_by,
+                         CONCAT(users.first_name, ' ', users.last_name) as recorded_by,
                          fuel_type,
                          liters")
             ->where('tanker_arrivals.arrival_date', '>=', $start)
@@ -131,7 +130,7 @@ class AnalyticsRepository implements AnalyticsInterface
                          tanker_departures.tanker_number,
                          tanker_departures.driver,
                          tanker_departures.departure_date,
-                         users.first_name || ' ' || users.last_name as recorded_by,
+                         CONCAT(users.first_name, ' ', users.last_name) as recorded_by,
                          fuel_type,
                          liters,
                          methanol_percent,

@@ -1,4 +1,4 @@
-@extends('super_admin.layout.app')
+@extends('admin.layout.app')
 
 @section('title', 'Transaction History')
 

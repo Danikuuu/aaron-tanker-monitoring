@@ -24,10 +24,16 @@ class RegisterController extends Controller
     }
 
     /**
-     * Show registration form
+     * Show registration form.
+     * Handles ?accepted=1 or ?accepted=0 returned from the privacy policy page.
      */
-    public function create()
+    public function create(Request $request)
     {
+        if ($request->has('accepted')) {
+            // Store accepted as its own flat key so it's never overwritten by saveDraft
+            $request->session()->put('signup_draft_accepted', $request->query('accepted') === '1');
+        }
+
         return view('auth.signup');
     }
 
@@ -42,6 +48,9 @@ class RegisterController extends Controller
 
         try {
             $this->registerService->register($data, $this->otpService);
+
+            // Clear draft and accepted flag after successful submission
+            $request->session()->forget(['signup_draft', 'signup_draft_accepted']);
 
             return redirect()->route('otp')->with('success', 'OTP sent to your email.');
 
@@ -66,22 +75,22 @@ class RegisterController extends Controller
             }
 
             $data = Session::get('otp.register');
-            
+
             $email = $data['payload']['email'] ?? null;
-            
+
             if (!$email) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Email not found in registration data. Please restart the registration process.'
                 ], 400);
             }
-            
+
             $newOtp = $this->otpService->resend('register');
-            
+
             Mail::to($email)->send(new OtpMail($newOtp));
-            
+
             session()->flash('dev_otp', $newOtp);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'A new OTP has been sent to your email.',
@@ -90,7 +99,7 @@ class RegisterController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Resend registration OTP error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to resend OTP. Please try again.'
@@ -111,7 +120,7 @@ class RegisterController extends Controller
             Auth::login($user);
 
             $this->otpService->clear('register');
-            
+
             if ($user->role === 'staff') {
                 return redirect()->route('staff.fuel-supply');
             } elseif ($user->role === 'admin') {
@@ -126,5 +135,22 @@ class RegisterController extends Controller
         } catch (\Exception $e) {
             return back()->withErrors(['otp' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * Save signup form data to session, then redirect to the privacy policy page.
+     * Does NOT touch the accepted flag — that is managed separately.
+     */
+    public function saveDraft(Request $request)
+    {
+        $request->session()->put('signup_draft', [
+            'first_name'            => $request->input('first_name'),
+            'last_name'             => $request->input('last_name'),
+            'email'                 => $request->input('email'),
+            'password'              => $request->input('password'),
+            'password_confirmation' => $request->input('password_confirmation'),
+        ]);
+
+        return redirect()->route('privacy.policy');
     }
 }

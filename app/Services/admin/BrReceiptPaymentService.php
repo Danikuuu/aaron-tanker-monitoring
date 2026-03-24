@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\BrReceipt;
 use App\Models\BrReceiptPayment;
 use App\Repositories\Admin\BrReceiptPaymentInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,9 +17,9 @@ class BrReceiptPaymentService
         protected BrReceiptPaymentInterface $repository
     ) {}
 
-    public function getAllReceipts(): Collection
+    public function getAllReceipts(array $filters = []): LengthAwarePaginator
     {
-        return $this->repository->getAllReceipts();
+        return $this->repository->getAllReceipts($filters);
     }
 
     public function findReceipt(int $id): BrReceipt
@@ -41,6 +42,7 @@ class BrReceiptPaymentService
                 'address'             => $validated['address']       ?? null,
                 'tin'                 => $validated['tin']           ?? null,
                 'terms'               => $validated['terms']         ?? null,
+                'downpayment'         => $validated['downpayment'] ?? 0,
                 'grand_total'         => $validated['grand_total'],
             ]);
 
@@ -78,6 +80,13 @@ class BrReceiptPaymentService
     public function upsertPayment(BrReceipt $receipt, array $validated): BrReceiptPayment
     {
         return DB::transaction(function () use ($receipt, $validated) {
+
+            // If no payment record exists yet and the receipt has a downpayment,
+            // seed down_payment from the receipt so it isn't lost.
+            $existingPayment = $receipt->payment;
+            if (!$existingPayment && (float) $receipt->downpayment > 0) {
+                $validated['down_payment'] = $validated['down_payment'] ?? $receipt->downpayment;
+            }
 
             $payment = $this->repository->upsertPayment(
                 $receipt,

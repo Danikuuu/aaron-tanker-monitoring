@@ -22,7 +22,7 @@ class StaffDeleted extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Account Has Been Blocked',
+            subject: 'Your Account Has Been Deleted',
         );
     }
 

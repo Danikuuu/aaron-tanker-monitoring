@@ -15,12 +15,14 @@ class BrReceipt extends Model
         'tin',
         'terms',
         'grand_total',
+        'downpayment',
     ];
 
     protected function casts(): array
     {
         return [
             'grand_total' => 'decimal:2',
+            'downpayment' => 'decimal:2',
         ];
     }
 

@@ -14,18 +14,18 @@ class StoreTankerArrivalRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tanker_number'   => 'required|string|max:255',
-            'driver'          => 'required|string|max:255',
+            'tanker_number'   => 'required|string|max:10',
+            'driver'          => 'required|string|max:10',
             'departure_date'  => 'required|date',
 
             'fuel_type'       => 'required|array',
             'fuel_type.*'     => 'nullable|string|in:diesel,premium,unleaded,methanol',
 
             'liters'          => 'required|array',
-            'liters.*'        => 'nullable|numeric|min:1',
+            'liters.*'        => 'nullable|numeric|min:1|max:10000',
 
             'methanol_liters' => 'nullable|array',
-            'methanol_liters.*' => 'nullable|numeric|min:0'
+            'methanol_liters.*' => 'nullable|numeric|min:0|max:10000'
         ];
     }
 

@@ -8,7 +8,7 @@
     {{-- Fuel Stocks --}}
     <div class="grid grid-cols-4 gap-6">
         @foreach(['diesel' => 'Diesel', 'premium' => 'Premium', 'unleaded' => 'Unleaded', 'methanol' => 'Methanol'] as $type => $label)
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg border border-gray-200 shadow-[0_0_10px_rgba(0,0,0,0.30)] p-6">
             <h3 class="font-bold text-lg mb-2">{{ $label }}</h3>
             <p class="text-primary text-3xl font-bold">
                 {{ number_format($stocks[$type]->liters ?? 0, 2) }} L
@@ -18,7 +18,7 @@
     </div>
 
     {{-- Overall Total --}}
-    <div class="bg-white rounded-lg shadow p-6 flex items-center justify-between">
+    <div class="bg-white rounded-lg border border-gray-200 shadow-[0_0_10px_rgba(0,0,0,0.30)] p-6 flex items-center justify-between">
         <h3 class="font-bold text-lg">Overall Total Fuel</h3>
         <p class="text-primary text-3xl font-bold">
             {{ number_format($stocks->sum('liters'), 2) }} L
@@ -44,12 +44,12 @@
         </div>
         <div class="col-span-4 flex gap-3 justify-end">
             <a href="{{ route('super_admin.fuel-summary') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition">Clear</a>
-            <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-[#ff4040] transition text-sm">Filter</button>
+            <button type="submit" class="bg-primary text-white px-6 py-2 cursor-pointer rounded-lg hover:bg-[#ff4040] transition text-sm">Filter</button>
         </div>
     </form>
 
     {{-- Fuel Arrival Summary --}}
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white rounded-lg border border-gray-200 shadow-[0_0_10px_rgba(0,0,0,0.30)] p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Fuel Arrival Summary</h2>
             <div class="flex gap-2">
@@ -74,23 +74,27 @@
             <table class="w-full">
                 <thead>
                     <tr class="bg-primary text-white">
-                        <th class="px-4 py-3 text-left">Tanker Number</th>
-                        <th class="px-4 py-3 text-left">Arrival Date</th>
-                        <th class="px-4 py-3 text-left">Recorded By</th>
-                        <th class="px-4 py-3 text-left">Fuels</th>
-                        <th class="px-4 py-3 text-left rounded-tr-lg">Action</th>
+                        <th class="px-4 py-3 text-left" style="width:15%">Tanker Number</th>
+                        <th class="px-4 py-3 text-left" style="width:14%">Arrival Date</th>
+                        <th class="px-4 py-3 text-left" style="width:16%">Recorded By</th>
+                        <th class="px-4 py-3 text-left" style="width:40%">Fuels</th>
+                        <th class="px-4 py-3 text-left rounded-tr-lg" style="width:15%">Action</th>
                     </tr>
                 </thead>
                 <tbody class="bg-gray-50">
                     @forelse($arrivals as $arrival)
                     @php
                         $arrivalData = json_encode([
+                            'id'            => $arrival->id,
                             'tanker_number' => $arrival->tanker_number,
                             'arrival_date'  => $arrival->arrival_date->format('m/d/Y'),
+                            'arrival_date_raw' => $arrival->arrival_date->format('Y-m-d'),
                             'recorded_by'   => trim(($arrival->recordedBy->first_name ?? '') . ' ' . ($arrival->recordedBy->last_name ?? '')),
                             'fuels'         => $arrival->fuels->map(fn($f) => [
+                                'id'        => $f->id,
                                 'fuel_type' => $f->fuel_type,
                                 'liters'    => number_format($f->liters, 2),
+                                'liters_raw' => $f->liters,
                             ])->values(),
                         ]);
                     @endphp
@@ -101,7 +105,7 @@
                             {{ $arrival->recordedBy->first_name ?? '—' }}
                             {{ $arrival->recordedBy->last_name ?? '' }}
                         </td>
-                        <td class="px-4 py-3">
+                        <td class="px-4 py-3 align-top">
                             <div class="flex flex-wrap gap-1">
                                 @foreach($arrival->fuels as $fuel)
                                     <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full font-semibold
@@ -115,12 +119,23 @@
                                 @endforeach
                             </div>
                         </td>
-                        <td class="px-4 py-3">
-                            <button
-                                onclick="openArrivalModal({{ $arrivalData }})"
-                                class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-[#ff4040] transition text-sm">
-                                View
-                            </button>
+                        <td class="px-4 py-3 align-top whitespace-nowrap">
+                            <div class="flex items-center gap-2">
+                                <button
+                                    onclick="openArrivalModal({{ $arrivalData }})"
+                                    class="bg-primary text-white px-4 py-2 cursor-pointer rounded-lg hover:bg-[#ff4040] transition text-sm">
+                                    View
+                                </button>
+                                <button
+                                    onclick="openEditArrivalModal({{ $arrivalData }})"
+                                    class="bg-blue-500 text-white px-4 py-2 cursor-pointer rounded-lg hover:bg-blue-600 transition text-sm flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                    Edit
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @empty
@@ -163,7 +178,7 @@
     </div>
 
     {{-- Fuel Departure Summary --}}
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white rounded-lg border border-gray-200 shadow-[0_0_10px_rgba(0,0,0,0.30)] p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Fuel Departure Summary</h2>
             <div class="flex gap-2">
@@ -188,25 +203,29 @@
             <table class="w-full">
                 <thead>
                     <tr class="bg-primary text-white">
-                        <th class="px-4 py-3 text-left">Tanker Number</th>
-                        <th class="px-4 py-3 text-left">Driver</th>
-                        <th class="px-4 py-3 text-left">Departure Date</th>
-                        <th class="px-4 py-3 text-left">Recorded By</th>
-                        <th class="px-4 py-3 text-left">Fuels</th>
-                        <th class="px-4 py-3 text-left rounded-tr-lg">Action</th>
+                        <th class="px-4 py-3 text-left" style="width:15%">Tanker Number</th>
+                        <th class="px-4 py-3 text-left" style="width:13%">Driver</th>
+                        <th class="px-4 py-3 text-left" style="width:14%">Departure Date</th>
+                        <th class="px-4 py-3 text-left" style="width:16%">Recorded By</th>
+                        <th class="px-4 py-3 text-left" style="width:27%">Fuels</th>
+                        <th class="px-4 py-3 text-left rounded-tr-lg" style="width:15%">Action</th>
                     </tr>
                 </thead>
                 <tbody class="bg-gray-50">
                     @forelse($departures as $departure)
                     @php
                         $departureData = json_encode([
+                            'id'             => $departure->id,
                             'tanker_number'  => $departure->tanker_number,
                             'driver'         => $departure->driver,
                             'departure_date' => $departure->departure_date->format('m/d/Y'),
+                            'departure_date_raw' => $departure->departure_date->format('Y-m-d'),
                             'recorded_by'    => trim(($departure->recordedBy->first_name ?? '') . ' ' . ($departure->recordedBy->last_name ?? '')),
                             'fuels'          => $departure->fuels->map(fn($f) => [
+                                'id'               => $f->id,
                                 'fuel_type'        => $f->fuel_type,
                                 'liters'           => number_format($f->liters, 2),
+                                'liters_raw'       => $f->liters,
                                 'methanol_liters'  => $f->methanol_liters ?? 0,
                                 'methanol_percent' => $f->methanol_percent ?? 0,
                             ])->values(),
@@ -220,7 +239,7 @@
                             {{ $departure->recordedBy->first_name ?? '—' }}
                             {{ $departure->recordedBy->last_name ?? '' }}
                         </td>
-                        <td class="px-4 py-3">
+                        <td class="px-4 py-3 align-top">
                             <div class="flex flex-wrap gap-1">
                                 @foreach($departure->fuels as $fuel)
                                     <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full font-semibold
@@ -237,12 +256,23 @@
                                 @endforeach
                             </div>
                         </td>
-                        <td class="px-4 py-3">
-                            <button
-                                onclick="openDepartureModal({{ $departureData }})"
-                                class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-[#ff4040] transition text-sm">
-                                View
-                            </button>
+                        <td class="px-4 py-3 align-top whitespace-nowrap">
+                            <div class="flex items-center gap-2">
+                                <button
+                                    onclick="openDepartureModal({{ $departureData }})"
+                                    class="bg-primary cursor-pointer text-white px-4 py-2 rounded-lg hover:bg-[#ff4040] transition text-sm">
+                                    View
+                                </button>
+                                <button
+                                    onclick="openEditDepartureModal({{ $departureData }})"
+                                    class="bg-blue-500 text-white px-4 py-2 cursor-pointer rounded-lg hover:bg-blue-600 transition text-sm flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                    Edit
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @empty
@@ -286,14 +316,10 @@
 
 </div>
 
-{{-- ===================== ARRIVAL MODAL ===================== --}}
+{{-- ===================== ARRIVAL VIEW MODAL ===================== --}}
 <div id="arrivalModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
-    {{-- Backdrop --}}
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeArrivalModal()"></div>
-
-    {{-- Modal Card --}}
     <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden animate-modal">
-        {{-- Header --}}
         <div class="bg-primary px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="bg-white/20 rounded-lg p-2">
@@ -303,16 +329,13 @@
                 </div>
                 <h3 class="text-white font-bold text-lg">Fuel Arrival Details</h3>
             </div>
-            <button onclick="closeArrivalModal()" class="text-white/80 hover:text-white transition">
+            <button onclick="closeArrivalModal()" class="text-white/80 cursor-pointer hover:text-white transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         </div>
-
-        {{-- Body --}}
         <div class="p-6 space-y-4">
-            {{-- Info Grid --}}
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-gray-50 rounded-xl p-4">
                     <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Tanker Number</p>
@@ -327,33 +350,23 @@
                     <p id="am-recorded" class="font-bold text-gray-800 text-sm">—</p>
                 </div>
             </div>
-
-            {{-- Fuels --}}
             <div>
                 <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Fuel Breakdown</p>
-                <div id="am-fuels" class="space-y-2">
-                    {{-- populated by JS --}}
-                </div>
+                <div id="am-fuels" class="space-y-2"></div>
             </div>
         </div>
-
-        {{-- Footer --}}
         <div class="px-6 pb-6">
-            <button onclick="closeArrivalModal()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 rounded-xl transition text-sm">
+            <button onclick="closeArrivalModal()" class="w-full cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 rounded-xl transition text-sm">
                 Close
             </button>
         </div>
     </div>
 </div>
 
-{{-- ===================== DEPARTURE MODAL ===================== --}}
+{{-- ===================== DEPARTURE VIEW MODAL ===================== --}}
 <div id="departureModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
-    {{-- Backdrop --}}
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeDepartureModal()"></div>
-
-    {{-- Modal Card --}}
     <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden animate-modal">
-        {{-- Header --}}
         <div class="bg-gray-800 px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="bg-white/20 rounded-lg p-2">
@@ -363,16 +376,13 @@
                 </div>
                 <h3 class="text-white font-bold text-lg">Fuel Departure Details</h3>
             </div>
-            <button onclick="closeDepartureModal()" class="text-white/80 hover:text-white transition">
+            <button onclick="closeDepartureModal()" class="text-white/80 cursor-pointer hover:text-white transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         </div>
-
-        {{-- Body --}}
         <div class="p-6 space-y-4">
-            {{-- Info Grid --}}
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-gray-50 rounded-xl p-4">
                     <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Tanker Number</p>
@@ -391,22 +401,148 @@
                     <p id="dm-recorded" class="font-bold text-gray-800 text-sm">—</p>
                 </div>
             </div>
-
-            {{-- Fuels --}}
             <div>
                 <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Fuel Breakdown</p>
-                <div id="dm-fuels" class="space-y-2">
-                    {{-- populated by JS --}}
-                </div>
+                <div id="dm-fuels" class="space-y-2"></div>
             </div>
         </div>
-
-        {{-- Footer --}}
         <div class="px-6 pb-6">
-            <button onclick="closeDepartureModal()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 rounded-xl transition text-sm">
+            <button onclick="closeDepartureModal()" class="w-full cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 rounded-xl transition text-sm">
                 Close
             </button>
         </div>
+    </div>
+</div>
+
+{{-- ===================== EDIT ARRIVAL MODAL ===================== --}}
+<div id="editArrivalModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeEditArrivalModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden animate-modal">
+        {{-- Header --}}
+        <div class="bg-blue-500 px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/20 rounded-lg p-2">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </div>
+                <h3 class="text-white font-bold text-lg">Edit Fuel Arrival</h3>
+            </div>
+            <button onclick="closeEditArrivalModal()" class="text-white/80 cursor-pointer hover:text-white transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        {{-- Form --}}
+        <form id="editArrivalForm" method="POST">
+            @csrf
+            @method('PUT')
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Tanker Number</label>
+                        <input type="text" name="tanker_number" id="ea-tanker"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                               required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Arrival Date</label>
+                        <input type="date" name="arrival_date" id="ea-date" readonly
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                               required>
+                    </div>
+                </div>
+
+                {{-- Fuel Rows --}}
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Fuel Breakdown</p>
+                    <div id="ea-fuels" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <div class="px-6 pb-6 flex gap-3">
+                <button type="button" onclick="closeEditArrivalModal()"
+                        class="flex-1 cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 rounded-xl transition text-sm">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="flex-1 cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 rounded-xl transition text-sm">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- ===================== EDIT DEPARTURE MODAL ===================== --}}
+<div id="editDepartureModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeEditDepartureModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden animate-modal">
+        {{-- Header --}}
+        <div class="bg-blue-500 px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/20 rounded-lg p-2">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </div>
+                <h3 class="text-white font-bold text-lg">Edit Fuel Departure</h3>
+            </div>
+            <button onclick="closeEditDepartureModal()" class="text-white/80 cursor-pointer hover:text-white transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        {{-- Form --}}
+        <form id="editDepartureForm" method="POST">
+            @csrf
+            @method('PUT')
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Tanker Number</label>
+                        <input type="text" name="tanker_number" id="ed-tanker"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                               required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Driver</label>
+                        <input type="text" name="driver" id="ed-driver"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                               required>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Departure Date</label>
+                        <input type="date" name="departure_date" id="ed-date" readonly
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                               required>
+                    </div>
+                </div>
+
+                {{-- Fuel Rows --}}
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Fuel Breakdown</p>
+                    <div id="ed-fuels" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <div class="px-6 pb-6 flex gap-3">
+                <button type="button" onclick="closeEditDepartureModal()"
+                        class="flex-1 cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 rounded-xl transition text-sm">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="flex-1 cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 rounded-xl transition text-sm">
+                    Save Changes
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -420,9 +556,13 @@
         animation: modalIn 0.2s ease-out forwards;
     }
 </style>
-
+ 
 {{-- ===================== SCRIPTS ===================== --}}
 <script>
+    // Base URLs passed from Blade so JS never hard-codes paths
+    const arrivalUpdateBase   = "{{ url('super_admin/fuel-summary/arrivals') }}";
+    const departureUpdateBase = "{{ url('super_admin/fuel-summary/departures') }}";
+ 
     const fuelBadgeClass = (type) => {
         const map = {
             diesel:   'bg-green-100 text-green-700',
@@ -432,18 +572,17 @@
         };
         return map[type] ?? 'bg-gray-100 text-gray-700';
     };
-
+ 
     const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-
-    /* ---------- ARRIVAL MODAL ---------- */
+ 
+    /* ---------- ARRIVAL VIEW MODAL ---------- */
     function openArrivalModal(data) {
-        document.getElementById('am-tanker').textContent   = data.tanker_number  || '—';
-        document.getElementById('am-date').textContent     = data.arrival_date   || '—';
-        document.getElementById('am-recorded').textContent = data.recorded_by || '—';
-
+        document.getElementById('am-tanker').textContent   = data.tanker_number || '—';
+        document.getElementById('am-date').textContent     = data.arrival_date  || '—';
+        document.getElementById('am-recorded').textContent = data.recorded_by   || '—';
+ 
         const container = document.getElementById('am-fuels');
         container.innerHTML = '';
-
         if (data.fuels && data.fuels.length) {
             data.fuels.forEach(fuel => {
                 const row = document.createElement('div');
@@ -459,36 +598,32 @@
         } else {
             container.innerHTML = '<p class="text-sm text-gray-400 text-center py-2">No fuel records.</p>';
         }
-
         document.getElementById('arrivalModal').classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
-
+ 
     function closeArrivalModal() {
         document.getElementById('arrivalModal').classList.add('hidden');
         document.body.style.overflow = '';
     }
-
-    /* ---------- DEPARTURE MODAL ---------- */
+ 
+    /* ---------- DEPARTURE VIEW MODAL ---------- */
     function openDepartureModal(data) {
         document.getElementById('dm-tanker').textContent   = data.tanker_number  || '—';
         document.getElementById('dm-driver').textContent   = data.driver         || '—';
         document.getElementById('dm-date').textContent     = data.departure_date || '—';
         document.getElementById('dm-recorded').textContent = data.recorded_by    || '—';
-
+ 
         const container = document.getElementById('dm-fuels');
         container.innerHTML = '';
-
         if (data.fuels && data.fuels.length) {
             data.fuels.forEach(fuel => {
                 const row = document.createElement('div');
                 row.className = 'flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3';
-
                 let extra = '';
                 if (fuel.methanol_liters > 0) {
                     extra = `<span class="text-xs text-gray-400 ml-1">(${fuel.methanol_percent}% M)</span>`;
                 }
-
                 row.innerHTML = `
                     <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${fuelBadgeClass(fuel.fuel_type)}">
                         ${capitalize(fuel.fuel_type)}
@@ -503,21 +638,128 @@
         } else {
             container.innerHTML = '<p class="text-sm text-gray-400 text-center py-2">No fuel records.</p>';
         }
-
         document.getElementById('departureModal').classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
-
+ 
     function closeDepartureModal() {
         document.getElementById('departureModal').classList.add('hidden');
         document.body.style.overflow = '';
     }
-
+ 
+    /* ---------- EDIT ARRIVAL MODAL ---------- */
+    function openEditArrivalModal(data) {
+        document.getElementById('ea-tanker').value = data.tanker_number    || '';
+        document.getElementById('ea-date').value   = data.arrival_date_raw || '';
+ 
+        document.getElementById('editArrivalForm').action =
+            `${arrivalUpdateBase}/${data.id}`;
+ 
+        const container = document.getElementById('ea-fuels');
+        container.innerHTML = '';
+        if (data.fuels && data.fuels.length) {
+            data.fuels.forEach((fuel, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3';
+                wrapper.innerHTML = `
+                    <input type="hidden" name="fuels[${index}][id]" value="${fuel.id}">
+                    <span class="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full ${fuelBadgeClass(fuel.fuel_type)} whitespace-nowrap">
+                        ${capitalize(fuel.fuel_type)}
+                    </span>
+                    <div class="flex-1 flex items-center gap-2">
+                        <input type="number" name="fuels[${index}][liters]"
+                               value="${fuel.liters_raw}"
+                               step="0.01" min="0"
+                               class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                               placeholder="Liters" required>
+                        <span class="text-sm text-gray-500 whitespace-nowrap">L</span>
+                    </div>
+                `;
+                container.appendChild(wrapper);
+            });
+        } else {
+            container.innerHTML = '<p class="text-sm text-gray-400 text-center py-2">No fuel records.</p>';
+        }
+ 
+        document.getElementById('editArrivalModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+ 
+    function closeEditArrivalModal() {
+        document.getElementById('editArrivalModal').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+ 
+    /* ---------- EDIT DEPARTURE MODAL ---------- */
+    function openEditDepartureModal(data) {
+        document.getElementById('ed-tanker').value = data.tanker_number      || '';
+        document.getElementById('ed-driver').value = data.driver             || '';
+        document.getElementById('ed-date').value   = data.departure_date_raw || '';
+ 
+        document.getElementById('editDepartureForm').action =
+            `${departureUpdateBase}/${data.id}`;
+ 
+        const container = document.getElementById('ed-fuels');
+        container.innerHTML = '';
+        if (data.fuels && data.fuels.length) {
+            data.fuels.forEach((fuel, index) => {
+                const hasMethanol = fuel.methanol_liters > 0;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'bg-gray-50 rounded-xl px-4 py-3 space-y-2';
+                wrapper.innerHTML = `
+                    <input type="hidden" name="fuels[${index}][id]" value="${fuel.id}">
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full ${fuelBadgeClass(fuel.fuel_type)} whitespace-nowrap">
+                            ${capitalize(fuel.fuel_type)}
+                        </span>
+                        <div class="flex-1 flex items-center gap-2">
+                            <input type="number" name="fuels[${index}][liters]"
+                                   value="${fuel.liters_raw}"
+                                   step="0.01" min="0"
+                                   class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                   placeholder="Liters" required>
+                            <span class="text-sm text-gray-500 whitespace-nowrap">L</span>
+                        </div>
+                    </div>
+                    ${hasMethanol ? `
+                    <div class="flex items-center gap-3 pl-1">
+                        <span class="text-xs text-gray-400 w-20">Methanol L</span>
+                        <input type="number" name="fuels[${index}][methanol_liters]"
+                               value="${fuel.methanol_liters}"
+                               step="0.01" min="0"
+                               class="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                               placeholder="Methanol liters">
+                        <span class="text-xs text-gray-400 w-8">%</span>
+                        <input type="number" name="fuels[${index}][methanol_percent]"
+                               value="${fuel.methanol_percent}"
+                               step="0.01" min="0" max="100"
+                               class="w-20 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                               placeholder="%">
+                    </div>
+                    ` : ''}
+                `;
+                container.appendChild(wrapper);
+            });
+        } else {
+            container.innerHTML = '<p class="text-sm text-gray-400 text-center py-2">No fuel records.</p>';
+        }
+ 
+        document.getElementById('editDepartureModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+ 
+    function closeEditDepartureModal() {
+        document.getElementById('editDepartureModal').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+ 
     /* Close on Escape key */
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeArrivalModal();
             closeDepartureModal();
+            closeEditArrivalModal();
+            closeEditDepartureModal();
         }
     });
 </script>

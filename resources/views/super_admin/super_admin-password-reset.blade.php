@@ -104,7 +104,7 @@
             </div>
 
             <button type="submit"
-                    class="w-full bg-primary text-white py-3 rounded-full hover:bg-[#ff4040] transition font-semibold text-base">
+                    class="w-full bg-primary text-white py-3 rounded-full hover:bg-[#ff4040] cursor-pointer transition font-semibold text-base">
                 Update Password
             </button>
         </form>
@@ -127,15 +127,12 @@
                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>`;
     }
-</script>
-<script>
-    const fuelForm = document.getElementById('fuelForm');
-    const submitBtn = fuelForm.querySelector('button[type="submit"]');
 
-    fuelForm.addEventListener('submit', function() {
-        // Disable the button immediately to prevent multiple clicks
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'Submitting...'; // Optional: give user feedback
+    // Prevent double submit
+    document.querySelector('form').addEventListener('submit', function () {
+        const btn = this.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Updating...';
     });
 </script>
 

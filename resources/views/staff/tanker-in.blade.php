@@ -169,9 +169,9 @@
                                     Litres @if($i === 1)<span class="req">*</span>@endif
                                 </label>
                                 <input type="number" name="liters[{{ $i }}]"
-                                       placeholder="Enter litres" min="1"
-                                       class="fuel-liters ti-input"
-                                       {{ $i === 1 ? 'required' : '' }}>
+                                    placeholder="Enter litres" min="1" max="60000"
+                                    class="fuel-liters ti-input"
+                                    {{ $i === 1 ? 'required' : '' }}>
                             </div>
                         </div>
                     </div>

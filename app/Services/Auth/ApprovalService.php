@@ -94,6 +94,6 @@ class ApprovalService
 
     private function findStaff(int $staffId): User
     {
-        return User::where('role', 'staff')->findOrFail($staffId);
+        return User::whereIn('role', ['staff', 'admin'])->findOrFail($staffId);
     }
 }

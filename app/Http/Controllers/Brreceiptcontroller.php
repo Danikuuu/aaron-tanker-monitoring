@@ -84,6 +84,7 @@ class BrReceiptController extends Controller
                 'tin'            => $receipt->tin,
                 'terms'          => $receipt->terms,
                 'grand_total'    => $receipt->grand_total,
+                'downpayment'    => (float) $receipt->downpayment,
                 'tanker_number'  => $receipt->departure->tanker_number ?? '—',
                 'driver'         => $receipt->departure->driver        ?? '—',
                 'departure_date' => optional($receipt->departure->departure_date)->format('m/d/Y'),

@@ -3,24 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Your OTP Code</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-[#F5F5F5] text-[#111111] font-sans p-6">
-    <div class="max-w-lg mx-auto bg-white rounded-lg shadow-md p-8 text-center">
-        <h2 class="text-2xl font-semibold text-[#FF3B3B] mb-2">Hello!</h2>
-        <p class="text-[#6B7280] text-base mb-6">
+<body style="background-color: #F5F5F5; font-family: Arial, sans-serif; color: #111111; padding: 24px;">
+
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 32px; text-align: center;">
+        
+        <h2 style="color: #FF3B3B; font-size: 24px; font-weight: 600; margin-bottom: 16px;">Hello!</h2>
+        
+        <p style="color: #6B7280; font-size: 16px; margin-bottom: 24px;">
             We received a request to log in to your account. Use the OTP below to complete your login:
         </p>
 
-        <h1 class="text-4xl font-bold text-[#FF3B3B] mb-6">{{ $otp }}</h1>
+        <h1 style="color: #FF3B3B; font-size: 40px; font-weight: 700; margin-bottom: 24px;">
+            {{ $otp }}
+        </h1>
 
-        <p class="text-[#6B7280] text-sm">
+        <p style="color: #6B7280; font-size: 14px;">
             This OTP is valid for 5 minutes. Please do not share it with anyone.
         </p>
 
-        <p class="text-[#6B7280] text-xs mt-6">
-            &copy; {{ date('Y') }} Your Company Name. All rights reserved.
+        <p style="color: #6B7280; font-size: 13px; margin-top: 24px;">
+            &copy; {{ date('Y') }} AC Ang Fuel Distribution Services. All rights reserved.
         </p>
+
     </div>
+
 </body>
 </html>

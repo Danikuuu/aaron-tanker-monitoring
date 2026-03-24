@@ -17,15 +17,16 @@ class BrReceiptPaymentController extends Controller
     /**
      * List all BR Receipts with their payment status.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $receipts = $this->service->getAllReceipts();
-        $user = Auth::user();
+        $filters  = $request->only(['search', 'status', 'date_from', 'date_to']);
+        $receipts = $this->service->getAllReceipts($filters);
+        $user     = Auth::user();
 
         if ($user->role === 'admin') {
-            return view('admin.receipt.br-receipt-payment-index', compact('receipts'));
+            return view('admin.receipt.br-receipt-payment-index', compact('receipts', 'filters'));
         }
-        return view('super_admin.receipt.br-receipt-payment-index', compact('receipts'));
+        return view('super_admin.receipt.br-receipt-payment-index', compact('receipts', 'filters'));
     }
 
     /**

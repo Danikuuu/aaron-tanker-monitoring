@@ -14,6 +14,8 @@ use App\Http\Controllers\OtpController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ResetPasswordController;
+use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\StaffManagementController;
 use App\Http\Controllers\TankerHistoryController;
 use App\Http\Controllers\TankerDepartureController;
@@ -27,6 +29,8 @@ use Illuminate\Support\Facades\Route;
 // REGISTER
 // ===============================
 Route::view('/register', 'auth.signup')->name('register');
+Route::get('/register', [RegisterController::class, 'create'])->name('register');
+Route::post('/register/save-draft', [RegisterController::class, 'saveDraft'])->name('signup.save_draft');
 
 Route::post('/register', [RegisterController::class, 'store'])
     ->middleware('throttle:5,1')
@@ -198,6 +202,10 @@ Route::middleware([RoleMiddleware::class . ':super_admin'])->prefix('super_admin
     Route::get('/fuel-summary/export/arrivals/pdf',    [FuelSummaryController::class, 'exportArrivalsPdf'])->name('super_admin.fuel-summary.export.arrivals.pdf');
     Route::get('/fuel-summary/export/departures/pdf',  [FuelSummaryController::class, 'exportDeparturesPdf'])->name('super_admin.fuel-summary.export.departures.pdf');
 
+    // Update (SuperAdmin feature now available to Admin)
+    Route::put('/fuel-summary/arrivals/{id}',                 [FuelSummaryController::class, 'updateArrival'])      ->name('super_admin.arrivals.update');
+    Route::put('/fuel-summary/departures/{id}',               [FuelSummaryController::class, 'updateDeparture'])    ->name('super_admin.departures.update');
+
     Route::get('/transaction-history',        [TransactionHistoryController::class, 'index'])->name('super_admin.transaction-history');
     Route::get('/transaction-history/export', [TransactionHistoryController::class, 'export'])->name('super_admin.transaction-history.export');
     Route::get('/transaction-history/export/pdf', [TransactionHistoryController::class, 'exportPdf'])->name('super_admin.transaction-history.export.pdf');
@@ -215,13 +223,24 @@ Route::middleware([RoleMiddleware::class . ':super_admin'])->prefix('super_admin
     Route::post('/staff/{staffId}/unblock',  [ApprovalController::class, 'unblock'])->name('super_admin.staff.unblock');
     Route::delete('/staff/{staffId}',        [ApprovalController::class, 'destroy'])->name('super_admin.staff.delete');
 
-
-    // Inside your admin middleware group
+    // ===============================
+    // Super Admin Password Reset
+    // ===============================
     Route::get('/password/reset',  [ChangePasswordController::class, 'edit'])  ->name('super_admin.password.edit');
     Route::put('/password/update', [ChangePasswordController::class, 'update'])->name('super_admin.password.update');
 
-     Route::get('/admin/notifications', [NotificationController::class, 'index'])
+    // ===============================
+    // Notifications
+    // ===============================
+    Route::get('/admin/notifications', [NotificationController::class, 'index'])
     ->name('super_admin.notifications');
+
+    // Audit Logs
+    Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('super_admin.audit-logs');
+
+    // Search
+    Route::get('/search', [SearchController::class, 'index'])->name('search');
+
     
 });
 
@@ -231,10 +250,6 @@ Route::middleware([RoleMiddleware::class . ':super_admin'])->prefix('super_admin
 // ===============================
 Route::middleware([RoleMiddleware::class . ':staff'])->prefix('staff')->group(function () {
 
-
-    // ===============================
-    // Staff routes for in and out of tankers
-    // ===============================
     Route::get('/fuel-supply', [TankerHistoryController::class, 'index'])->name('staff.fuel-supply');
     Route::view('/tanker-departure', 'staff.tanker-departure')->name('staff.tanker-out');
     Route::view('/tanker-in', 'staff.tanker-in')->name('staff.tanker-in');

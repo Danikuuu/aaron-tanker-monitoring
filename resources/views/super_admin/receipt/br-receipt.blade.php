@@ -32,6 +32,27 @@
         margin: 8pt 0;
     }
     #previewWrapper { scroll-behavior: smooth; }
+
+    /* Price error modal */
+    .price-err-backdrop {
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        backdrop-filter: blur(3px);
+        opacity: 0; pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+    .price-err-backdrop.open { opacity: 1; pointer-events: all; }
+    .price-err-modal {
+        background: #fff; border-radius: 18px;
+        width: 90%; max-width: 440px;
+        box-shadow: 0 24px 80px rgba(0,0,0,0.18);
+        transform: translateY(16px) scale(0.97);
+        transition: transform 0.22s ease;
+        overflow: hidden;
+    }
+    .price-err-backdrop.open .price-err-modal { transform: translateY(0) scale(1); }
 </style>
 
 {{-- ═══════════════════════════ STEP 1 — SELECT DEPARTURE ═══════════════════════════ --}}
@@ -76,16 +97,16 @@
             </div>
             <div>
                 <label class="block text-xs font-medium text-gray-500 mb-1">Receipt No. <span class="text-[#FF5757]">*</span></label>
-                <input id="f_receipt_no" type="text" placeholder="e.g. 2501"
+                <input id="f_receipt_no" type="text" placeholder="e.g. 2501" readonly
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5757]">
             </div>
             <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">Delivered To</label>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Delivered To <span class="text-[#FF5757]">*</span></label>
                 <input id="f_delivered_to" type="text" placeholder="e.g. Sta. Ignacia Petron Station"
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5757]">
             </div>
             <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">Address</label>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Address <span class="text-[#FF5757]">*</span></label>
                 <input id="f_address" type="text" placeholder="e.g. Sta. Ignacia, Tarlac"
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5757]">
             </div>
@@ -99,10 +120,15 @@
                 <input id="f_terms" type="text" placeholder="e.g. A 50% down"
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5757]">
             </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Downpayment / Payment (₱)</label>
+                <input id="f_downpayment" type="number" step="0.01" min="0" placeholder="0.00"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5757]">
+            </div>
         </div>
 
         <div class="mt-5">
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Fuel Details — Unit Price &amp; Remarks</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Fuel Details — Unit Price &amp; Remarks <span class="text-[#FF5757]">*</span></label>
             <div id="fuelFormRows" class="space-y-2"></div>
         </div>
 
@@ -188,8 +214,18 @@
                         </thead>
                         <tbody id="p1_fuelRows"></tbody>
                         <tfoot>
+                            <tr style="background:#f5f5f5;color:#111;">
+                                <td colspan="3" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:6.5pt;font-weight:700;letter-spacing:.08em;text-align:right;border:0.5pt solid #ccc;">GROSS TOTAL</td>
+                                <td colspan="2" id="p1_gross_total" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:700;text-align:right;border:0.5pt solid #ccc;"></td>
+                                <td style="border:0.5pt solid #ccc;"></td>
+                            </tr>
+                            <tr style="background:#fff8e1;color:#92600A;">
+                                <td colspan="3" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:6.5pt;font-weight:700;letter-spacing:.08em;text-align:right;border:0.5pt solid #FCD34D;">DOWNPAYMENT</td>
+                                <td colspan="2" id="p1_downpayment_row" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:700;text-align:right;border:0.5pt solid #FCD34D;"></td>
+                                <td style="border:0.5pt solid #FCD34D;"></td>
+                            </tr>
                             <tr style="background:black;color:white;">
-                                <td colspan="3" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:6.5pt;font-weight:700;letter-spacing:.08em;text-align:right;border:0.5pt solid #444;">GRAND TOTAL</td>
+                                <td colspan="3" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:6.5pt;font-weight:700;letter-spacing:.08em;text-align:right;border:0.5pt solid #444;">BALANCE DUE</td>
                                 <td colspan="2" id="p1_grand_total" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:9pt;font-weight:700;text-align:right;border:0.5pt solid #444;"></td>
                                 <td style="border:0.5pt solid #444;"></td>
                             </tr>
@@ -272,8 +308,18 @@
                         </thead>
                         <tbody id="p2_fuelRows"></tbody>
                         <tfoot>
+                            <tr style="background:#f5f5f5;color:#111;">
+                                <td colspan="3" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:6.5pt;font-weight:700;letter-spacing:.08em;text-align:right;border:0.5pt solid #ccc;">GROSS TOTAL</td>
+                                <td colspan="2" id="p2_gross_total" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:700;text-align:right;border:0.5pt solid #ccc;"></td>
+                                <td style="border:0.5pt solid #ccc;"></td>
+                            </tr>
+                            <tr style="background:#fff8e1;color:#92600A;">
+                                <td colspan="3" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:6.5pt;font-weight:700;letter-spacing:.08em;text-align:right;border:0.5pt solid #FCD34D;">DOWNPAYMENT</td>
+                                <td colspan="2" id="p2_downpayment_row" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:700;text-align:right;border:0.5pt solid #FCD34D;"></td>
+                                <td style="border:0.5pt solid #FCD34D;"></td>
+                            </tr>
                             <tr style="background:black;color:white;">
-                                <td colspan="3" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:6.5pt;font-weight:700;letter-spacing:.08em;text-align:right;border:0.5pt solid #444;">GRAND TOTAL</td>
+                                <td colspan="3" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:6.5pt;font-weight:700;letter-spacing:.08em;text-align:right;border:0.5pt solid #444;">BALANCE DUE</td>
                                 <td colspan="2" id="p2_grand_total" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:9pt;font-weight:700;text-align:right;border:0.5pt solid #444;"></td>
                                 <td style="border:0.5pt solid #444;"></td>
                             </tr>
@@ -322,7 +368,7 @@
             </div>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full">
+                <table class="w-full" id="receiptHistoryTable">
                     <thead>
                         <tr class="bg-primary text-white text-sm">
                             <th class="px-4 py-3 text-left rounded-tl-lg">Receipt No.</th>
@@ -371,7 +417,7 @@
                             <td class="px-4 py-3 text-center">
                                 <button
                                     onclick="redownloadReceipt({{ $receipt->id }})"
-                                    class="bg-gray-800 text-white px-3 py-1.5 rounded-lg hover:bg-gray-700 transition text-xs flex items-center gap-1.5 mx-auto">
+                                    class="bg-gray-800 text-white px-3 py-1.5 cursor-pointer rounded-lg hover:bg-gray-700 transition text-xs flex items-center gap-1.5 mx-auto">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -417,10 +463,30 @@
     </div>
 </div>
 
-{{-- ═══════════════════════════ HIDDEN RE-DOWNLOAD RECEIPT ═══════════════════════════ --}}
-{{-- Off-screen receipt DOM used only for re-download rendering --}}
-<div id="redownloadCapture"
-     style="position:absolute;left:-9999px;top:0;width:8.5in;background:white;font-family:'IBM Plex Mono',monospace;">
+
+{{-- ═══════════════════════════ PRICE ERROR MODAL ═══════════════════════════ --}}
+<div id="priceErrorModal" class="price-err-backdrop" onclick="if(event.target===this)closePriceModal()">
+    <div class="price-err-modal">
+        <div class="flex items-center gap-3 px-6 pt-6 pb-4 border-b border-red-100">
+            <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="font-bold text-gray-900 text-sm">Please Fill In Required Fields</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Please review and correct the following:</p>
+            </div>
+        </div>
+        <ul id="priceErrorList" class="px-6 py-4 space-y-2 text-sm text-red-700"></ul>
+        <div class="px-6 pb-5 pt-2 flex justify-end">
+            <button onclick="closePriceModal()"
+                    class="bg-[#FF5757] text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-[#e04444] transition">
+                OK, Fix Values
+            </button>
+        </div>
+    </div>
 </div>
 
 {{-- ═══════════════════════════ JAVASCRIPT ═══════════════════════════ --}}
@@ -458,6 +524,12 @@
         document.getElementById('f_driver').value = data.driver;
         document.getElementById('f_date').value   = data.departure_date;
 
+        // Clear editable fields when switching departures
+        document.getElementById('f_downpayment').value  = '';
+        document.getElementById('f_delivered_to').value = '';
+        document.getElementById('f_address').value      = '';
+        document.getElementById('f_terms').value        = '';
+
         const container = document.getElementById('fuelFormRows');
         container.innerHTML = '';
 
@@ -475,8 +547,8 @@
                     ${methanolLiters > 0 ? `<div class="text-xs text-gray-400 mt-0.5 font-mono">${liters.toLocaleString('en', { minimumFractionDigits: 2 })} L fuel + ${methanolLiters.toLocaleString('en', { minimumFractionDigits: 2 })} L methanol</div>` : ''}
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Unit Price (₱)</label>
-                    <input type="number" step="0.01" min="0" id="price_${idx}" placeholder="0.00"
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Unit Price (₱) <span class="text-[#FF5757]">*</span></label>
+                    <input type="number" step="0.01" min="0" max="9999999.99" id="price_${idx}" placeholder="0.00"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5757]">
                 </div>
                 <div>
@@ -492,17 +564,71 @@
         document.getElementById('previewSection').classList.add('hidden');
     });
 
-    // ── 2. Build preview ─────────────────────────────────────────────────────
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function fmt(n) {
+        return '₱ ' + n.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // ── Price error modal helpers ─────────────────────────────────────────────
+    function showPriceError(errors) {
+        const list = document.getElementById('priceErrorList');
+        list.innerHTML = errors.map(e => `
+            <li class="flex items-start gap-2">
+                <span class="mt-0.5 shrink-0 w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xs font-bold">!</span>
+                <span>${e}</span>
+            </li>`).join('');
+        document.getElementById('priceErrorModal').classList.add('open');
+    }
+
+    function closePriceModal() {
+        document.getElementById('priceErrorModal').classList.remove('open');
+    }
+
+    // ── 2. Build preview ──────────────────────────────────────────────────────
     function buildPreview() {
+        const errors = [];
+
+        // ── Required field validation ─────────────────────────────────────────
+        const deliveredTo = document.getElementById('f_delivered_to').value.trim();
+        const address     = document.getElementById('f_address').value.trim();
+
+        if (!deliveredTo) errors.push('"Delivered To" is required.');
+        if (!address)     errors.push('"Address" is required.');
+
+        // All fuel unit prices must be filled in and greater than 0
+        currentFuels.forEach((fuel, idx) => {
+            const price = parseFloat(document.getElementById(`price_${idx}`)?.value) || 0;
+            if (!price || price <= 0) {
+                errors.push(`${fuel.fuel_type.toUpperCase()}: Unit Price is required.`);
+            }
+        });
+
+        // ── Max value validation ──────────────────────────────────────────────
+        currentFuels.forEach((fuel, idx) => {
+            const price = parseFloat(document.getElementById(`price_${idx}`)?.value) || 0;
+            if (price > 100) {
+                errors.push(`${fuel.fuel_type.toUpperCase()}: ₱${price.toFixed(2)} exceeds the maximum allowed unit price of ₱100.00`);
+            }
+        });
+
+        const downpaymentVal = parseFloat(document.getElementById('f_downpayment').value) || 0;
+        if (downpaymentVal > 1000000) {
+            errors.push(`Downpayment: ₱${downpaymentVal.toLocaleString('en', { minimumFractionDigits: 2 })} exceeds the maximum allowed amount of ₱1,000,000.00`);
+        }
+
+        if (errors.length > 0) {
+            showPriceError(errors);
+            return;
+        }
+
         const receiptNo    = document.getElementById('f_receipt_no').value.trim()   || '—';
-        const deliveredTo  = document.getElementById('f_delivered_to').value.trim() || '—';
-        const address      = document.getElementById('f_address').value.trim()      || '—';
         const tin          = document.getElementById('f_tin').value.trim()          || '—';
         const terms        = document.getElementById('f_terms').value.trim()        || '—';
+        const downpayment  = downpaymentVal;
         const tankerDriver = `${document.getElementById('f_tanker').value} / ${document.getElementById('f_driver').value}`;
         const date         = document.getElementById('f_date').value;
 
-        let grandTotal = 0;
+        let grossTotal = 0;
         let rowsHtml   = '';
 
         currentFuels.forEach((fuel, idx) => {
@@ -512,7 +638,7 @@
             const methanolLiters = parseFloat(fuel.methanol_liters) || 0;
             const totalLiters    = liters + methanolLiters;
             const amount         = totalLiters * price;
-            grandTotal          += amount;
+            grossTotal          += amount;
 
             rowsHtml += buildFuelRow(totalLiters, fuel.fuel_type, price, amount, remarks);
         });
@@ -522,18 +648,29 @@
             rowsHtml += `<tr><td class="r-cell">&nbsp;</td><td class="r-cell"></td><td class="r-cell"></td><td class="r-cell"></td><td class="r-cell"></td><td class="r-cell"></td></tr>`;
         }
 
-        const totalFormatted = grandTotal > 0 ? '₱ ' + grandTotal.toLocaleString('en', { minimumFractionDigits: 2 }) : '—';
+        const balanceDue           = Math.max(0, grossTotal - downpayment);
+        const grossFormatted       = grossTotal   > 0 ? fmt(grossTotal)   : '—';
+        const downpaymentFormatted = downpayment  > 0 ? `(${fmt(downpayment)})` : '—';
+        const balanceFormatted     = grossTotal   > 0 ? fmt(balanceDue)   : '—';
 
         ['1','2'].forEach(n => {
-            document.getElementById(`p${n}_receipt_no`).textContent    = `Nº ${receiptNo}`;
-            document.getElementById(`p${n}_delivered_to`).textContent  = deliveredTo;
-            document.getElementById(`p${n}_tanker_driver`).textContent = tankerDriver;
-            document.getElementById(`p${n}_terms`).textContent         = terms;
-            document.getElementById(`p${n}_date`).textContent          = date;
-            document.getElementById(`p${n}_address`).textContent       = address;
-            document.getElementById(`p${n}_tin`).textContent           = tin;
-            document.getElementById(`p${n}_fuelRows`).innerHTML        = rowsHtml;
-            document.getElementById(`p${n}_grand_total`).textContent   = totalFormatted;
+            document.getElementById(`p${n}_receipt_no`).textContent       = `Nº ${receiptNo}`;
+            document.getElementById(`p${n}_delivered_to`).textContent     = deliveredTo;
+            document.getElementById(`p${n}_tanker_driver`).textContent    = tankerDriver;
+            document.getElementById(`p${n}_terms`).textContent            = terms;
+            document.getElementById(`p${n}_date`).textContent             = date;
+            document.getElementById(`p${n}_address`).textContent          = address;
+            document.getElementById(`p${n}_tin`).textContent              = tin;
+            document.getElementById(`p${n}_fuelRows`).innerHTML           = rowsHtml;
+            document.getElementById(`p${n}_gross_total`).textContent      = grossFormatted;
+            document.getElementById(`p${n}_downpayment_row`).textContent  = downpaymentFormatted;
+            document.getElementById(`p${n}_grand_total`).textContent      = balanceFormatted;
+        });
+
+        // Hide downpayment row entirely if no downpayment entered
+        document.querySelectorAll('#p1_downpayment_row, #p2_downpayment_row').forEach(cell => {
+            const row = cell.closest('tr');
+            if (row) row.style.display = downpayment > 0 ? '' : 'none';
         });
 
         document.getElementById('previewSection').classList.remove('hidden');
@@ -552,7 +689,7 @@
             </tr>`;
     }
 
-    // ── 3. Export PDF + save + remove from dropdown ───────────────────────────
+    // ── 3. Export PDF + save ──────────────────────────────────────────────────
     function exportPdf() {
         const btn       = document.getElementById('exportBtn');
         const receiptNo = document.getElementById('f_receipt_no').value.trim() || 'receipt';
@@ -578,22 +715,18 @@
             .then(data => {
                 element.style.width = '';
 
-                // Remove the used departure from the dropdown
                 const select = document.getElementById('departureSelect');
                 const optToRemove = select.querySelector(`option[value="${currentDepartureId}"]`);
                 if (optToRemove) optToRemove.remove();
 
-                // Reset the form
                 select.value = '';
                 document.getElementById('formSection').classList.add('hidden');
                 document.getElementById('previewSection').classList.add('hidden');
                 currentFuels = [];
                 currentDepartureId = null;
 
-                // Add to history table immediately (prepend)
-                addToHistoryTable(data.receipt);
-
                 fetchNextReceiptNumber();
+                window.location.reload();
 
                 btn.disabled = false;
                 btn.innerHTML = '🖨 Export PDF';
@@ -606,20 +739,14 @@
             });
     }
 
-    // ── Add new receipt row to history table dynamically ─────────────────────
-    function addToHistoryTable(receipt) {
-        const tbody = document.querySelector('#receiptHistoryTable tbody');
-        if (!tbody) return; // table not yet rendered (empty state), reload instead
-        window.location.reload(); // simplest — reload to reflect new history row
-    }
-
-    // ── Save to DB ────────────────────────────────────────────────────────────
+    // ── Save to DB ─────────────────────────────────────────────────────────────
     function saveReceiptToDatabase() {
         const receiptNo   = document.getElementById('f_receipt_no').value.trim();
         const deliveredTo = document.getElementById('f_delivered_to').value.trim();
         const address     = document.getElementById('f_address').value.trim();
         const tin         = document.getElementById('f_tin').value.trim();
         const terms       = document.getElementById('f_terms').value.trim();
+        const downpayment = parseFloat(document.getElementById('f_downpayment').value) || 0;
 
         let grandTotal = 0;
         const fuels = currentFuels.map((fuel, idx) => {
@@ -639,6 +766,7 @@
             delivered_to: deliveredTo,
             address, tin, terms,
             grand_total:  grandTotal,
+            downpayment:  downpayment,
             fuels
         };
 
@@ -654,43 +782,71 @@
         });
     }
 
-    // ── Re-download an existing receipt from history ──────────────────────────
+    // ── Re-download ────────────────────────────────────────────────────────────
     function redownloadReceipt(id) {
         const btn = event.currentTarget;
-        btn.disabled = true;
-        btn.textContent = 'Loading...';
+        btn.disabled    = true;
+        btn.textContent = 'Downloading...';
 
-        fetch(`{{ url('/super_admin/br-receipt') }}/${id}`, {
-            headers: { 'Accept': 'application/json' }
+        const showUrl = '{{ route("super_admin.br-receipt.show", ["id" => ":id"]) }}'.replace(':id', id);
+
+        fetch(showUrl, {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(res => res.ok ? res.json() : Promise.reject(res))
         .then(r => {
-            const receipt = r.receipt;
+            const receipt      = r.receipt;
             const tankerDriver = `${receipt.tanker_number} / ${receipt.driver}`;
+            const downpayment  = parseFloat(receipt.downpayment) || 0;
 
-            // Build rows HTML
-            let rowsHtml = '';
-            let grandTotal = 0;
+            let rowsHtml   = '';
+            let grossTotal = 0;
             receipt.fuels.forEach(fuel => {
-                const amount = parseFloat(fuel.liters) * parseFloat(fuel.unit_price);
-                grandTotal  += amount;
-                rowsHtml    += buildFuelRow(
-                    parseFloat(fuel.liters),
-                    fuel.fuel_type,
-                    parseFloat(fuel.unit_price),
-                    amount,
-                    fuel.remarks || ''
-                );
+                const liters    = parseFloat(fuel.liters);
+                const unitPrice = parseFloat(fuel.unit_price);
+                const amount    = liters * unitPrice;
+                grossTotal     += amount;
+                rowsHtml       += buildFuelRow(liters, fuel.fuel_type, unitPrice, amount, fuel.remarks || '');
             });
+
             const padRows = Math.max(0, 5 - receipt.fuels.length);
             for (let i = 0; i < padRows; i++) {
                 rowsHtml += `<tr><td class="r-cell">&nbsp;</td><td class="r-cell"></td><td class="r-cell"></td><td class="r-cell"></td><td class="r-cell"></td><td class="r-cell"></td></tr>`;
             }
-            const totalFormatted = '₱ ' + grandTotal.toLocaleString('en', { minimumFractionDigits: 2 });
 
-            // Inject into the off-screen capture div
-            const capture = document.getElementById('redownloadCapture');
-            capture.innerHTML = buildReceiptHtml(receipt, tankerDriver, rowsHtml, totalFormatted);
+            const balanceDue           = Math.max(0, grossTotal - downpayment);
+            const grossFormatted       = fmt(grossTotal);
+            const downpaymentFormatted = downpayment > 0 ? `(${fmt(downpayment)})` : '—';
+            const balanceFormatted     = fmt(balanceDue);
+
+            ['1', '2'].forEach(n => {
+                document.getElementById(`p${n}_receipt_no`).textContent       = `Nº ${receipt.receipt_no}`;
+                document.getElementById(`p${n}_delivered_to`).textContent     = receipt.delivered_to   || '—';
+                document.getElementById(`p${n}_tanker_driver`).textContent    = tankerDriver;
+                document.getElementById(`p${n}_terms`).textContent            = receipt.terms          || '—';
+                document.getElementById(`p${n}_date`).textContent             = receipt.departure_date || '—';
+                document.getElementById(`p${n}_address`).textContent          = receipt.address        || '—';
+                document.getElementById(`p${n}_tin`).textContent              = receipt.tin            || '—';
+                document.getElementById(`p${n}_fuelRows`).innerHTML           = rowsHtml;
+                document.getElementById(`p${n}_gross_total`).textContent      = grossFormatted;
+                document.getElementById(`p${n}_downpayment_row`).textContent  = downpaymentFormatted;
+                document.getElementById(`p${n}_grand_total`).textContent      = balanceFormatted;
+            });
+
+            // Hide downpayment row if none saved
+            document.querySelectorAll('#p1_downpayment_row, #p2_downpayment_row').forEach(cell => {
+                const row = cell.closest('tr');
+                if (row) row.style.display = downpayment > 0 ? '' : 'none';
+            });
+
+            const capture = document.getElementById('receiptCapture');
+            const section = document.getElementById('previewSection');
+
+            section.style.position   = 'absolute';
+            section.style.left       = '-9999px';
+            section.style.top        = '0';
+            section.style.visibility = 'hidden';
+            section.classList.remove('hidden');
 
             const opt = {
                 margin:      [0, 0, 0, 0],
@@ -701,114 +857,25 @@
                 pagebreak:   { mode: ['avoid-all', 'css'] }
             };
 
-            return html2pdf().set(opt).from(capture).save();
+            return html2pdf().set(opt).from(capture).save().then(() => {
+                section.classList.add('hidden');
+                section.style.position   = '';
+                section.style.left       = '';
+                section.style.top        = '';
+                section.style.visibility = '';
+            });
         })
         .then(() => {
-            btn.disabled = false;
-            btn.innerHTML = '⬇ Re-download';
+            btn.disabled  = false;
+            btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg> Re-download`;
         })
         .catch(err => {
             console.error(err);
-            alert('Failed to load receipt data.');
-            btn.disabled = false;
-            btn.innerHTML = '⬇ Re-download';
+            alert('Failed to download receipt.');
+            btn.disabled  = false;
+            btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg> Re-download`;
         });
     }
-
-    // ── Build full receipt HTML for re-download (both copies) ────────────────
-    function buildReceiptHtml(r, tankerDriver, rowsHtml, totalFormatted) {
-        const copy = (label) => `
-        <div style="border:1pt solid #ccc;padding:0;">
-            <div style="border-bottom:1.5pt solid black;padding:5pt 7pt 4pt;text-align:center;">
-                <div style="font-family:'IBM Plex Sans',sans-serif;font-size:11.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.02em;line-height:1.1;">A.C. Ang Fuel Distribution Services</div>
-                <div style="font-size:6.8pt;margin-top:1.5pt;color:#333;">Aaron Carl Agustin Ang — Prop. | Guimba, Nueva Ecija</div>
-                <div style="font-size:6.5pt;color:#555;">Cell Nos.: 0912-626-9364 · 09088856506</div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;background:black;color:white;padding:3pt 8pt;">
-                <span style="font-family:'IBM Plex Mono',monospace;font-size:6.5pt;font-weight:600;letter-spacing:.1em;text-transform:uppercase;">Delivery Receipt</span>
-                <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5pt;font-weight:700;">Nº ${r.receipt_no}</span>
-            </div>
-            <div style="display:grid;grid-template-columns:2fr 1.3fr 0.85fr 0.85fr;border-bottom:1pt solid black;">
-                <div style="padding:3pt 6pt;border-right:1pt solid black;">
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:5.5pt;font-weight:700;text-transform:uppercase;color:#555;">Delivered To</div>
-                    <div style="border-bottom:0.5pt solid #999;min-height:11pt;font-size:7pt;font-family:'IBM Plex Mono',monospace;">${r.delivered_to || ''}</div>
-                </div>
-                <div style="padding:3pt 6pt;border-right:1pt solid black;">
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:5.5pt;font-weight:700;text-transform:uppercase;color:#555;">Tanker Plate / Driver</div>
-                    <div style="border-bottom:0.5pt solid #999;min-height:11pt;font-size:7pt;font-family:'IBM Plex Mono',monospace;">${tankerDriver}</div>
-                </div>
-                <div style="padding:3pt 6pt;border-right:1pt solid black;">
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:5.5pt;font-weight:700;text-transform:uppercase;color:#555;">Terms</div>
-                    <div style="border-bottom:0.5pt solid #999;min-height:11pt;font-size:7pt;font-family:'IBM Plex Mono',monospace;">${r.terms || ''}</div>
-                </div>
-                <div style="padding:3pt 6pt;">
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:5.5pt;font-weight:700;text-transform:uppercase;color:#555;">Date</div>
-                    <div style="border-bottom:0.5pt solid #999;min-height:11pt;font-size:7pt;font-family:'IBM Plex Mono',monospace;">${r.departure_date || ''}</div>
-                </div>
-            </div>
-            <div style="display:grid;grid-template-columns:1.6fr 1fr;border-bottom:1pt solid black;">
-                <div style="padding:3pt 6pt;border-right:1pt solid black;">
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:5.5pt;font-weight:700;text-transform:uppercase;color:#555;">Address</div>
-                    <div style="border-bottom:0.5pt solid #999;min-height:11pt;font-size:7pt;font-family:'IBM Plex Mono',monospace;">${r.address || ''}</div>
-                </div>
-                <div style="padding:3pt 6pt;">
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:5.5pt;font-weight:700;text-transform:uppercase;color:#555;">TIN</div>
-                    <div style="border-bottom:0.5pt solid #999;min-height:11pt;font-size:7pt;font-family:'IBM Plex Mono',monospace;">${r.tin || ''}</div>
-                </div>
-            </div>
-            <div style="border-bottom:1pt solid black;">
-                <table style="width:100%;border-collapse:collapse;font-size:7pt;">
-                    <thead><tr>
-                        <th class="r-cell-hdr" style="width:12%;text-align:right;">QTY</th>
-                        <th class="r-cell-hdr" style="width:9%;text-align:center;">Unit</th>
-                        <th class="r-cell-hdr" style="width:17%;text-align:center;">Product</th>
-                        <th class="r-cell-hdr" style="width:17%;text-align:right;">Unit Price</th>
-                        <th class="r-cell-hdr" style="width:22%;text-align:right;">Amount</th>
-                        <th class="r-cell-hdr" style="width:23%;text-align:left;">Remarks</th>
-                    </tr></thead>
-                    <tbody>${rowsHtml}</tbody>
-                    <tfoot><tr style="background:black;color:white;">
-                        <td colspan="3" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:6.5pt;font-weight:700;text-align:right;border:0.5pt solid #444;">GRAND TOTAL</td>
-                        <td colspan="2" style="padding:3pt 5pt;font-family:'IBM Plex Mono',monospace;font-size:9pt;font-weight:700;text-align:right;border:0.5pt solid #444;">${totalFormatted}</td>
-                        <td style="border:0.5pt solid #444;"></td>
-                    </tr></tfoot>
-                </table>
-            </div>
-            <div style="padding:4pt 7pt 3pt;border-bottom:1pt solid black;font-size:5.4pt;line-height:1.4;color:#333;">
-                <span style="font-weight:700;">WAIVER OF GOOD QUALITY (MAAYOS NA KALIDAD) AND CORRECT QUANTITY (TAMANG SUKAT):</span>
-                BY SIGNING IN THE DELIVERY RECEIPT, RECEIVER ACKNOWLEDGE THAT PRODUCT PASSED GOOD QUALITY (MAAYOS NA KALIDAD)
-                AND CORRECT QUANTITY (TAMANG SUKAT). ONCE SIGNED THE CUSTOMER & AUTHORIZED RECEIVER SHALL BE RESPONSIBLE
-                FOR THE PRODUCT AND THIS OFFICE WILL NOT ENTERTAIN ANY CLAIM OF DAMAGE.
-            </div>
-            <div style="display:flex;">
-                <div style="flex:1;border-right:1pt solid black;padding:4pt 7pt;">
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:5.5pt;font-weight:700;text-transform:uppercase;margin-bottom:2pt;">Receiver's Signature (Over Printed Name)</div>
-                    <div style="border-bottom:0.5pt solid #555;min-height:18pt;"></div>
-                    <div style="font-size:5pt;color:#666;margin-top:2pt;font-style:italic;">Received the above goods and supplies in good order and condition.</div>
-                </div>
-                <div style="flex:1;padding:4pt 7pt;">
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:5.5pt;font-weight:700;text-transform:uppercase;margin-bottom:2pt;">Authorized Receiver's Signature (Over Printed Name)</div>
-                    <div style="border-bottom:0.5pt solid #555;min-height:18pt;"></div>
-                    <div style="font-size:5pt;color:#666;margin-top:2pt;font-style:italic;">(Authorized Receiver Only)</div>
-                </div>
-            </div>
-            <div style="border-top:0.5pt solid #ddd;padding:2pt 7pt;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:5pt;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#aaa;">${label}</div>
-        </div>`;
-
-        return copy('OFFICE COPY')
-             + `<hr style="border:none;border-top:1.5pt dashed #aaa;margin:8pt 0;">`
-             + copy('CUSTOMER COPY');
-    }
-</script>
-<script>
-    const fuelForm = document.getElementById('fuelForm');
-    const submitBtn = fuelForm.querySelector('button[type="submit"]');
-
-    fuelForm.addEventListener('submit', function() {
-        // Disable the button immediately to prevent multiple clicks
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'Submitting...'; // Optional: give user feedback
-    });
 </script>
 
 @endsection

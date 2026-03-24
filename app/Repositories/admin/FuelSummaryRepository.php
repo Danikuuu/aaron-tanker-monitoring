@@ -22,7 +22,9 @@ class FuelSummaryRepository implements FuelSummaryInterface
             ->when(isset($filters['search']) && $filters['search'], fn($q) =>
                 $q->where(fn($q2) =>
                     $q2->where('tanker_number', 'like', "%{$filters['search']}%")
-                       ->orWhereHas('recordedBy', fn($q3) => $q3->whereRaw("first_name || ' ' || last_name like ?", ["%{$filters['search']}%"]))
+                       ->orWhereHas('recordedBy', fn($q3) =>
+                           $q3->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$filters['search']}%"])
+                       )
                 )
             )
             ->when(isset($filters['date_from']) && $filters['date_from'], fn($q) => $q->whereDate('arrival_date', '>=', $filters['date_from']))
@@ -39,7 +41,9 @@ class FuelSummaryRepository implements FuelSummaryInterface
                 $q->where(fn($q2) =>
                     $q2->where('tanker_number', 'like', "%{$filters['search']}%")
                        ->orWhere('driver', 'like', "%{$filters['search']}%")
-                       ->orWhereHas('recordedBy', fn($q3) => $q3->whereRaw("first_name || ' ' || last_name like ?", ["%{$filters['search']}%"]))
+                       ->orWhereHas('recordedBy', fn($q3) =>
+                           $q3->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$filters['search']}%"])
+                       )
                 )
             )
             ->when(isset($filters['date_from']) && $filters['date_from'], fn($q) => $q->whereDate('departure_date', '>=', $filters['date_from']))
@@ -57,14 +61,14 @@ class FuelSummaryRepository implements FuelSummaryInterface
             ->selectRaw("tanker_arrivals.id,
                          tanker_arrivals.tanker_number,
                          tanker_arrivals.arrival_date,
-                         users.first_name || ' ' || users.last_name as recorded_by,
+                         CONCAT(users.first_name, ' ', users.last_name) as recorded_by,
                          fuel_type,
                          liters");
 
         if (!empty($filters['search'])) {
-            $q->where(function($q2) use ($filters) {
+            $q->where(function ($q2) use ($filters) {
                 $q2->where('tanker_arrivals.tanker_number', 'like', "%{$filters['search']}%")
-                   ->orWhereRaw("users.first_name || ' ' || users.last_name like ?", ["%{$filters['search']}%"]);
+                   ->orWhereRaw("CONCAT(users.first_name, ' ', users.last_name) LIKE ?", ["%{$filters['search']}%"]);
             });
         }
         if (!empty($filters['date_from'])) {
@@ -86,7 +90,7 @@ class FuelSummaryRepository implements FuelSummaryInterface
                          tanker_departures.tanker_number,
                          tanker_departures.driver,
                          tanker_departures.departure_date,
-                         users.first_name || ' ' || users.last_name as recorded_by,
+                         CONCAT(users.first_name, ' ', users.last_name) as recorded_by,
                          fuel_type,
                          liters,
                          methanol_percent,
@@ -94,10 +98,10 @@ class FuelSummaryRepository implements FuelSummaryInterface
                          pure_liters");
 
         if (!empty($filters['search'])) {
-            $q->where(function($q2) use ($filters) {
+            $q->where(function ($q2) use ($filters) {
                 $q2->where('tanker_departures.tanker_number', 'like', "%{$filters['search']}%")
                    ->orWhere('tanker_departures.driver', 'like', "%{$filters['search']}%")
-                   ->orWhereRaw("users.first_name || ' ' || users.last_name like ?", ["%{$filters['search']}%"]);
+                   ->orWhereRaw("CONCAT(users.first_name, ' ', users.last_name) LIKE ?", ["%{$filters['search']}%"]);
             });
         }
         if (!empty($filters['date_from'])) {
@@ -108,5 +112,70 @@ class FuelSummaryRepository implements FuelSummaryInterface
         }
 
         return $q->orderBy('tanker_departures.departure_date', 'desc')->get();
+    }
+
+    /**
+     * Find a tanker arrival by ID (eager-loads fuels).
+     */
+    public function findArrival(int $id): TankerArrival
+    {
+        return TankerArrival::with('fuels')->findOrFail($id);
+    }
+
+    /**
+     * Update a tanker arrival and sync its child fuel lines inside a transaction.
+     */
+    public function updateArrival(TankerArrival $arrival, array $data): TankerArrival
+    {
+        return DB::transaction(function () use ($arrival, $data) {
+            $arrival->update([
+                'tanker_number' => $data['tanker_number'],
+                'arrival_date'  => $data['arrival_date'],
+            ]);
+
+            foreach ($data['fuels'] as $fuelData) {
+                $arrival->fuels()
+                    ->where('id', $fuelData['id'])
+                    ->update([
+                        'liters' => $fuelData['liters'],
+                    ]);
+            }
+
+            return $arrival->fresh('fuels');
+        });
+    }
+
+    /**
+     * Find a tanker departure by ID (eager-loads fuels).
+     */
+    public function findDeparture(int $id): TankerDeparture
+    {
+        return TankerDeparture::with('fuels')->findOrFail($id);
+    }
+
+    /**
+     * Update a tanker departure and sync its child fuel lines inside a transaction.
+     */
+    public function updateDeparture(TankerDeparture $departure, array $data): TankerDeparture
+    {
+        return DB::transaction(function () use ($departure, $data) {
+            $departure->update([
+                'tanker_number'  => $data['tanker_number'],
+                'driver'         => $data['driver'],
+                'departure_date' => $data['departure_date'],
+            ]);
+
+            foreach ($data['fuels'] as $fuelData) {
+                $departure->fuels()
+                    ->where('id', $fuelData['id'])
+                    ->update([
+                        'liters'           => $fuelData['liters'],
+                        'methanol_liters'  => $fuelData['methanol_liters']  ?? null,
+                        'methanol_percent' => $fuelData['methanol_percent'] ?? null,
+                    ]);
+            }
+
+            return $departure->fresh('fuels');
+        });
     }
 }

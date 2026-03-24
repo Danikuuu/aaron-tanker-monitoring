@@ -3,6 +3,8 @@
 namespace App\Services\Admin;
 
 use App\Repositories\Admin\FuelSummaryInterface;
+use App\Models\TankerArrival;
+use App\Models\TankerDeparture;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FuelSummaryService
@@ -81,6 +83,32 @@ class FuelSummaryService
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ]);
+    }
+
+    /**
+     * Update a tanker arrival record.
+     *
+     * @param  int   $id
+     * @param  array $data  Validated data from UpdateFuelArrivalRequest
+     */
+    public function updateArrival(int $id, array $data): TankerArrival
+    {
+        $arrival = $this->fuelSummaryRepository->findArrival($id);
+
+        return $this->fuelSummaryRepository->updateArrival($arrival, $data);
+    }
+
+    /**
+     * Update a tanker departure record.
+     *
+     * @param  int   $id
+     * @param  array $data  Validated data from UpdateFuelDepartureRequest
+     */
+    public function updateDeparture(int $id, array $data): TankerDeparture
+    {
+        $departure = $this->fuelSummaryRepository->findDeparture($id);
+
+        return $this->fuelSummaryRepository->updateDeparture($departure, $data);
     }
 
     private function streamCsv(string $filename, array $headers, $rows): StreamedResponse

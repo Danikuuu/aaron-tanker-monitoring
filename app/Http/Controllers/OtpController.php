@@ -18,9 +18,9 @@ class OtpController extends Controller
 {
     /**
      * Handle OTP verification for login, registration, and password reset contexts.
-      * Determines context based on session data and processes accordingly.
-      * On successful verification, logs in the user and redirects based on role.
-      * On failure, returns back with appropriate error messages.
+     * Determines context based on session data and processes accordingly.
+     * On successful verification, logs in the user and redirects based on role.
+     * On failure, returns back with appropriate error messages.
      */
     public function verify(
         OTPRequest $request,
@@ -44,7 +44,9 @@ class OtpController extends Controller
                 $payload = $otpService->verify('register', $enteredOtp);
                 $user = $registerService->completeRegistration($payload);
                 $otpService->clear('register');
-                return $this->redirectByRole($user);
+
+                return redirect()->route('login')
+                    ->with('success', 'Registration successful! Please wait for the admin to approve your account before logging in.');
             }
 
             if (Session::has('otp.password_reset')) {
@@ -74,21 +76,21 @@ class OtpController extends Controller
             if (Session::has('otp.login')) {
                 $data = Session::get('otp.login');
                 $userId = $data['payload']['user_id'] ?? null;
-                
+
                 if (!$userId) {
                     throw new \Exception('User ID not found in session');
                 }
-                
+
                 $user = User::find($userId);
-                
+
                 if (!$user) {
                     throw new \Exception('User not found');
                 }
-                
+
                 $newOtp = $otpService->resend('login');
-                
+
                 Mail::to($user->email)->send(new OtpMail($newOtp));
-                
+
                 return response()->json([
                     'success' => true,
                     'message' => 'A new OTP has been sent to your email.',
@@ -100,15 +102,15 @@ class OtpController extends Controller
                 $data = Session::get('otp.register');
 
                 $email = $data['payload']['email'] ?? null;
-                
+
                 if (!$email) {
                     throw new \Exception('Email not found in registration payload');
                 }
-                
+
                 $newOtp = $otpService->resend('register');
-                
+
                 Mail::to($email)->send(new OtpMail($newOtp));
-                
+
                 return response()->json([
                     'success' => true,
                     'message' => 'A new OTP has been sent to your email.',
@@ -119,27 +121,27 @@ class OtpController extends Controller
             if (Session::has('otp.password_reset')) {
                 $data = Session::get('otp.password_reset');
                 $userId = $data['payload']['user_id'] ?? null;
-                
+
                 if (!$userId) {
                     $email = $data['payload']['email'] ?? null;
-                    
+
                     if (!$email) {
                         throw new \Exception('User ID or email not found in session');
                     }
                 } else {
                     $user = User::find($userId);
-                    
+
                     if (!$user) {
                         throw new \Exception('User not found');
                     }
-                    
+
                     $email = $user->email;
                 }
-                
+
                 $newOtp = $otpService->resend('password_reset');
-                
+
                 Mail::to($email)->send(new OtpMail($newOtp));
-                
+
                 return response()->json([
                     'success' => true,
                     'message' => 'A new OTP has been sent to your email.',
@@ -154,7 +156,7 @@ class OtpController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Resend OTP error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to resend OTP. Please try again.'
@@ -162,17 +164,15 @@ class OtpController extends Controller
         }
     }
 
-
     /**
      * Helper method to redirect users based on their role after successful login or registration.
-      * Handles pending and blocked statuses for staff members, and redirects admins to the overview page.
-      * Logs out and redirects users with unauthorized roles.
-      * @param User $user The authenticated user object
-      * @return \Illuminate\Http\RedirectResponse
+     * Handles pending and blocked statuses for staff members, and redirects admins to the overview page.
+     * Logs out and redirects users with unauthorized roles.
+     * @param User $user The authenticated user object
+     * @return \Illuminate\Http\RedirectResponse
      */
     private function redirectByRole($user)
     {
-        // dd($user);
         if ($user->role === 'staff') {
             if ($user->isPending()) {
                 Auth::logout();
@@ -189,12 +189,11 @@ class OtpController extends Controller
 
         if ($user->role === 'admin') {
             return redirect()->route('admin.overview');
-        } 
-        
+        }
+
         if ($user->role === 'super_admin') {
             return redirect()->route('super_admin.overview');
         }
-        
 
         Auth::logout();
         return redirect()->route('login')

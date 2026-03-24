@@ -14,9 +14,9 @@ class CreateStaffRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => ['required', 'string', 'max:100'],
-            'last_name'  => ['required', 'string', 'max:100'],
-            'email'      => ['required', 'email', 'max:255', 'unique:users,email'],
+            'first_name' => ['required', 'string', 'max:10'],
+            'last_name'  => ['required', 'string', 'max:10'],
+            'email'      => ['required', 'email', 'max:30', 'unique:users,email'],
             'password'   => ['required', 'string', 'min:8', 'confirmed'],
             'role'       => ['required', 'string', 'in:staff,admin'],
         ];

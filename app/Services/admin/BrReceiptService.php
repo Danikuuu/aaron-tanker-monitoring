@@ -69,6 +69,7 @@ class BrReceiptService
                 'address' => $data['address'] ?? null,
                 'tin' => $data['tin'] ?? null,
                 'terms' => $data['terms'] ?? null,
+                'downpayment' => $data['downpayment'] ?? 0,
                 'grand_total' => $data['grand_total'],
             ]);
 

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Aaron Auth</title>
+    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/x-icon">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-100">

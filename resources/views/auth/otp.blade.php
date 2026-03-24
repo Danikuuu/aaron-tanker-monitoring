@@ -55,7 +55,7 @@
     </div>
 
     <button type="submit"
-        class="w-full bg-primary hover:bg-darkred text-white py-3 rounded-full font-semibold transition">
+        class="w-full bg-primary hover:bg-darkred text-white py-3 rounded-full font-semibold transition cursor-pointer">
         Verify OTP
     </button>
 </form>
@@ -64,7 +64,7 @@
 <div class="text-center mt-4">
     <button id="resendBtn"
         disabled
-        class="text-sm text-gray-400 hover:text-primary transition disabled:cursor-not-allowed disabled:hover:text-gray-400">
+        class="text-sm text-gray-400 hover:text-primary transition disabled:cursor-not-allowed disabled:hover:text-gray-400 cursor-pointer">
         Resend OTP <span id="resendTimer"></span>
     </button>
 </div>

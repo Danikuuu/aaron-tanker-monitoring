@@ -18,17 +18,19 @@ return new class extends Migration
             $table->string('tin')->nullable();
             $table->string('terms')->nullable();
             $table->decimal('grand_total', 12, 2)->default(0);
+            $table->decimal('downpayment', 12, 2)->default(0)->change();
             $table->timestamps();
         });
 
-        Schema::create('br_receipt_fuels', function (Blueprint $table) {
+        Schema::create('br_receipt_payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('br_receipt_id')->constrained()->cascadeOnDelete();
-            $table->string('fuel_type');
-            $table->decimal('liters', 10, 2);
-            $table->decimal('unit_price', 10, 2)->default(0);
-            $table->decimal('amount', 12, 2)->default(0);
-            $table->string('remarks')->nullable();
+            $table->decimal('amount_paid', 12, 2)->default(0);
+            $table->decimal('balance', 12, 2)->default(0);
+            $table->string('payment_method')->nullable();  // cash, check, transfer, etc.
+            $table->string('reference_no')->nullable();
+            $table->date('payment_date')->nullable();
+            $table->string('notes')->nullable();
             $table->timestamps();
         });
     }

@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/x-icon">
     <title>@yield('title', 'Aaron Gas Station')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -68,7 +69,9 @@
                 <div class="nav-pill">
 
                     {{-- Logo --}}
-                    <img src="{{ asset('images/AARON1.png') }}" class="h-9 sm:h-10 w-auto">
+                    <a href="{{ route('staff.fuel-supply') }}">
+                        <img src="{{ asset('images/AARON1.png') }}" class="h-9 sm:h-10 w-auto">
+                    </a>
 
                     {{-- Desktop Nav --}}
                     <nav class="hidden md:flex items-center gap-1">

@@ -45,13 +45,13 @@
     </div>
 
     <button type="submit"
-        class="w-full bg-primary hover:bg-darkred text-white py-3 rounded-full font-semibold transition">
+        class="w-full bg-primary hover:bg-darkred text-white py-3 rounded-full font-semibold transition cursor-pointer">
         Send OTP Code
     </button>
 
     <p class="text-center text-sm mt-4">
         Remember your password?
-        <a href="{{ route('login') }}" class="text-primary font-medium hover:underline">Back to Login</a>
+        <a href="{{ route('login') }}" class="text-primary font-medium hover:underline cursor-pointer">Back to Login</a>
     </p>
 </form>
 <script>

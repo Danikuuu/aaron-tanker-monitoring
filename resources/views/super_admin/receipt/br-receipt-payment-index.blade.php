@@ -13,11 +13,12 @@
 
 {{-- Summary Cards --}}
 @php
-    $total    = $receipts->count();
-    $unpaid   = $receipts->filter(fn($r) => !$r->payment || $r->payment->status === 'unpaid')->count();
-    $partial  = $receipts->filter(fn($r) => $r->payment?->status === 'partial')->count();
-    $paid     = $receipts->filter(fn($r) => $r->payment?->status === 'paid')->count();
-    $overdue  = $receipts->filter(fn($r) => $r->payment?->is_overdue)->count();
+    $allReceipts = $receipts->getCollection();
+    $total    = $receipts->total();
+    $unpaid   = $allReceipts->filter(fn($r) => !$r->payment || $r->payment->status === 'unpaid')->count();
+    $partial  = $allReceipts->filter(fn($r) => $r->payment?->status === 'partial')->count();
+    $paid     = $allReceipts->filter(fn($r) => $r->payment?->status === 'paid')->count();
+    $overdue  = $allReceipts->filter(fn($r) => $r->payment?->is_overdue)->count();
 @endphp
 
 <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
@@ -48,6 +49,63 @@
     </div>
 @endif
 
+{{-- Filters --}}
+<form method="GET" action="{{ route('super_admin.br-receipt-payments.index') }}"
+      class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-4">
+    <div class="flex flex-col sm:flex-row gap-3 flex-wrap">
+
+        {{-- Search --}}
+        <div class="relative flex-1 min-w-[200px]">
+            <input type="text" name="search"
+                   value="{{ $filters['search'] ?? '' }}"
+                   placeholder="Search receipt no. or client..."
+                   class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5757]">
+            <svg class="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+        </div>
+
+        {{-- Status --}}
+        <select name="status"
+                class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5757] bg-white text-gray-700">
+            <option value="">All Statuses</option>
+            <option value="unpaid"  {{ ($filters['status'] ?? '') === 'unpaid'  ? 'selected' : '' }}>Unpaid</option>
+            <option value="partial" {{ ($filters['status'] ?? '') === 'partial' ? 'selected' : '' }}>Partial</option>
+            <option value="paid"    {{ ($filters['status'] ?? '') === 'paid'    ? 'selected' : '' }}>Paid</option>
+        </select>
+
+        {{-- Date From --}}
+        <div class="flex items-center gap-2">
+            <label class="text-xs text-gray-500 whitespace-nowrap">From</label>
+            <input type="date" name="date_from"
+                   value="{{ $filters['date_from'] ?? '' }}"
+                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5757]">
+        </div>
+
+        {{-- Date To --}}
+        <div class="flex items-center gap-2">
+            <label class="text-xs text-gray-500 whitespace-nowrap">To</label>
+            <input type="date" name="date_to"
+                   value="{{ $filters['date_to'] ?? '' }}"
+                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5757]">
+        </div>
+
+        {{-- Actions --}}
+        <div class="flex gap-2">
+            <button type="submit"
+                    class="px-4 py-2 bg-[#FF5757] text-white text-sm font-semibold rounded-lg hover:bg-[#e04444] transition">
+                Filter
+            </button>
+            @if(array_filter($filters ?? []))
+                <a href="{{ route('super_admin.br-receipt-payments.index') }}"
+                   class="px-4 py-2 bg-gray-100 text-gray-600 text-sm font-semibold rounded-lg hover:bg-gray-200 transition">
+                    Clear
+                </a>
+            @endif
+        </div>
+    </div>
+</form>
+
 {{-- Receipts Table --}}
 <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
     @if($receipts->isEmpty())
@@ -76,11 +134,11 @@
                         @php
                             $payment  = $receipt->payment;
                             $status   = $payment?->status ?? 'unpaid';
-                            $balance  = $payment?->remaining_balance ?? $receipt->grand_total;
-                            $overdue  = $payment?->is_overdue ?? false;
+                            $balance  = $payment?->remaining_balance ?? max(0, (float)$receipt->grand_total - (float)$receipt->downpayment);
+                            $isOverdue = $payment?->is_overdue ?? false;
                             $dueDate  = $payment?->due_date;
                         @endphp
-                        <tr class="hover:bg-gray-50 transition {{ $overdue ? 'bg-red-50/40' : '' }}">
+                        <tr class="hover:bg-gray-50 transition {{ $isOverdue ? 'bg-red-50/40' : '' }}">
                             <td class="px-4 py-3 font-mono font-semibold text-gray-800">
                                 Nº {{ $receipt->receipt_no }}
                             </td>
@@ -98,10 +156,10 @@
                             <td class="px-4 py-3 text-right font-mono {{ $balance > 0 ? 'text-red-600 font-semibold' : 'text-green-600' }}">
                                 {{ $balance > 0 ? '₱ ' . number_format($balance, 2) : '—' }}
                             </td>
-                            <td class="px-4 py-3 text-center text-xs {{ $overdue ? 'text-red-600 font-semibold' : 'text-gray-500' }}">
+                            <td class="px-4 py-3 text-center text-xs {{ $isOverdue ? 'text-red-600 font-semibold' : 'text-gray-500' }}">
                                 @if($dueDate)
                                     {{ $dueDate->format('m/d/Y') }}
-                                    @if($overdue) <span class="block text-red-500 font-bold">OVERDUE</span> @endif
+                                    @if($isOverdue) <span class="block text-red-500 font-bold">OVERDUE</span> @endif
                                 @else
                                     —
                                 @endif
@@ -132,17 +190,40 @@
                 </tbody>
             </table>
         </div>
+
+        {{-- Pagination --}}
+        @if($receipts->hasPages())
+            <div class="px-4 py-3 border-t border-gray-100 flex items-center justify-between gap-4 flex-wrap">
+                <p class="text-xs text-gray-500">
+                    Showing {{ $receipts->firstItem() }}–{{ $receipts->lastItem() }} of {{ $receipts->total() }} receipts
+                </p>
+                <div class="flex items-center gap-1">
+                    @if($receipts->onFirstPage())
+                        <span class="px-3 py-1.5 text-xs text-gray-300 border border-gray-200 rounded-lg cursor-not-allowed">← Prev</span>
+                    @else
+                        <a href="{{ $receipts->previousPageUrl() }}"
+                           class="px-3 py-1.5 text-xs text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition">← Prev</a>
+                    @endif
+
+                    @foreach($receipts->getUrlRange(1, $receipts->lastPage()) as $page => $url)
+                        @if($page == $receipts->currentPage())
+                            <span class="px-3 py-1.5 text-xs font-bold text-white bg-[#FF5757] border border-[#FF5757] rounded-lg">{{ $page }}</span>
+                        @else
+                            <a href="{{ $url }}"
+                               class="px-3 py-1.5 text-xs text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition">{{ $page }}</a>
+                        @endif
+                    @endforeach
+
+                    @if($receipts->hasMorePages())
+                        <a href="{{ $receipts->nextPageUrl() }}"
+                           class="px-3 py-1.5 text-xs text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition">Next →</a>
+                    @else
+                        <span class="px-3 py-1.5 text-xs text-gray-300 border border-gray-200 rounded-lg cursor-not-allowed">Next →</span>
+                    @endif
+                </div>
+            </div>
+        @endif
     @endif
 </div>
-<script>
-    const fuelForm = document.getElementById('fuelForm');
-    const submitBtn = fuelForm.querySelector('button[type="submit"]');
-
-    fuelForm.addEventListener('submit', function() {
-        // Disable the button immediately to prevent multiple clicks
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'Submitting...'; // Optional: give user feedback
-    });
-</script>
 
 @endsection

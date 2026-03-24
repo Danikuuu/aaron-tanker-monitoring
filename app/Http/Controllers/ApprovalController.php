@@ -16,7 +16,7 @@ class ApprovalController extends Controller
      */
     public function index()
     {
-        $staff = User::where('role', 'staff')
+        $staff = User::whereIn('role', ['staff', 'admin'])
             ->orderByRaw("CASE
                 WHEN status = 'pending'  THEN 1
                 WHEN status = 'approved' THEN 2

@@ -18,16 +18,15 @@ class TransactionHistoryRepository implements TransactionHistoryInterface
         string $dateTo   = ''
     ): LengthAwarePaginator {
 
-        // Build a unified UNION query of arrivals + departures
         $arrivals = DB::table('tanker_arrivals')
             ->join('users', 'users.id', '=', 'tanker_arrivals.recorded_by')
             ->selectRaw("
                 tanker_arrivals.id,
-                'arrival'   as type,
+                'arrival' as type,
                 tanker_arrivals.tanker_number,
-                NULL        as driver,
-                tanker_arrivals.arrival_date   as transaction_date,
-                users.first_name || ' ' || users.last_name as recorded_by,
+                CAST(NULL AS CHAR) as driver,
+                tanker_arrivals.arrival_date as transaction_date,
+                CONCAT(users.first_name, ' ', users.last_name) as recorded_by,
                 tanker_arrivals.created_at
             ");
 
@@ -39,11 +38,10 @@ class TransactionHistoryRepository implements TransactionHistoryInterface
                 tanker_departures.tanker_number,
                 tanker_departures.driver,
                 tanker_departures.departure_date as transaction_date,
-                users.first_name || ' ' || users.last_name as recorded_by,
+                CONCAT(users.first_name, ' ', users.last_name) as recorded_by,
                 tanker_departures.created_at
             ");
 
-        // Apply type filter before union
         if ($type === 'arrival') {
             $query = $arrivals;
         } elseif ($type === 'departure') {
@@ -52,7 +50,6 @@ class TransactionHistoryRepository implements TransactionHistoryInterface
             $query = $arrivals->unionAll($departures);
         }
 
-        // Wrap in subquery for filtering + sorting
         $results = DB::table(DB::raw("({$query->toSql()}) as transactions"))
             ->mergeBindings($type === 'arrival' ? $arrivals : ($type === 'departure' ? $departures : $arrivals->unionAll($departures)))
             ->when($search, fn($q) =>
@@ -69,7 +66,6 @@ class TransactionHistoryRepository implements TransactionHistoryInterface
             ->paginate($perPage)
             ->withQueryString();
 
-        // Eager load fuels for each transaction
         $this->hydrateFuels($results);
 
         return $results;
@@ -81,6 +77,7 @@ class TransactionHistoryRepository implements TransactionHistoryInterface
         string $dateFrom = '',
         string $dateTo   = ''
     ): Collection {
+
         $arrivals = DB::table('tanker_arrivals')
             ->join('users', 'users.id', '=', 'tanker_arrivals.recorded_by')
             ->join('tanker_arrival_fuels', 'tanker_arrivals.id', '=', 'tanker_arrival_fuels.tanker_arrival_id')
@@ -88,13 +85,13 @@ class TransactionHistoryRepository implements TransactionHistoryInterface
                 tanker_arrivals.id,
                 'arrival' as type,
                 tanker_arrivals.tanker_number,
-                NULL as driver,
+                CAST(NULL AS CHAR) as driver,
                 tanker_arrivals.arrival_date as transaction_date,
-                users.first_name || ' ' || users.last_name as recorded_by,
+                CONCAT(users.first_name, ' ', users.last_name) as recorded_by,
                 tanker_arrival_fuels.fuel_type,
                 tanker_arrival_fuels.liters,
-                NULL as methanol_percent,
-                NULL as methanol_liters
+                CAST(NULL AS DECIMAL) as methanol_percent,
+                CAST(NULL AS DECIMAL) as methanol_liters
             ");
 
         $departures = DB::table('tanker_departures')
@@ -106,7 +103,7 @@ class TransactionHistoryRepository implements TransactionHistoryInterface
                 tanker_departures.tanker_number,
                 tanker_departures.driver,
                 tanker_departures.departure_date as transaction_date,
-                users.first_name || ' ' || users.last_name as recorded_by,
+                CONCAT(users.first_name, ' ', users.last_name) as recorded_by,
                 tanker_departure_fuels.fuel_type,
                 tanker_departure_fuels.liters,
                 tanker_departure_fuels.methanol_percent,
@@ -135,17 +132,23 @@ class TransactionHistoryRepository implements TransactionHistoryInterface
         if ($type === 'arrival') {
             $row = DB::table('tanker_arrivals')
                 ->join('users', 'users.id', '=', 'tanker_arrivals.recorded_by')
-                ->selectRaw("tanker_arrivals.id, 'arrival' as type, tanker_arrivals.tanker_number, NULL as driver, tanker_arrivals.arrival_date as transaction_date, users.first_name || ' ' || users.last_name as recorded_by, tanker_arrivals.created_at")
+                ->selectRaw("
+                    tanker_arrivals.id,
+                    'arrival' as type,
+                    tanker_arrivals.tanker_number,
+                    CAST(NULL AS CHAR) as driver,
+                    tanker_arrivals.arrival_date as transaction_date,
+                    CONCAT(users.first_name, ' ', users.last_name) as recorded_by,
+                    tanker_arrivals.created_at
+                ")
                 ->where('tanker_arrivals.id', $id)
                 ->first();
 
-            if (! $row) return null;
+            if (!$row) return null;
 
-            $fuels = DB::table('tanker_arrival_fuels')
+            $row->fuels = DB::table('tanker_arrival_fuels')
                 ->where('tanker_arrival_id', $id)
                 ->get();
-
-            $row->fuels = $fuels;
 
             return $row;
         }
@@ -153,22 +156,27 @@ class TransactionHistoryRepository implements TransactionHistoryInterface
         // departure
         $row = DB::table('tanker_departures')
             ->join('users', 'users.id', '=', 'tanker_departures.recorded_by')
-            ->selectRaw("tanker_departures.id, 'departure' as type, tanker_departures.tanker_number, tanker_departures.driver, tanker_departures.departure_date as transaction_date, users.first_name || ' ' || users.last_name as recorded_by, tanker_departures.created_at")
+            ->selectRaw("
+                tanker_departures.id,
+                'departure' as type,
+                tanker_departures.tanker_number,
+                tanker_departures.driver,
+                tanker_departures.departure_date as transaction_date,
+                CONCAT(users.first_name, ' ', users.last_name) as recorded_by,
+                tanker_departures.created_at
+            ")
             ->where('tanker_departures.id', $id)
             ->first();
 
-        if (! $row) return null;
+        if (!$row) return null;
 
-        $fuels = DB::table('tanker_departure_fuels')
+        $row->fuels = DB::table('tanker_departure_fuels')
             ->where('tanker_departure_id', $id)
             ->get();
-
-        $row->fuels = $fuels;
 
         return $row;
     }
 
-    // Attach fuel rows to each paginated transaction item
     private function hydrateFuels(\Illuminate\Pagination\LengthAwarePaginator $paginator): void
     {
         $arrivalIds   = [];

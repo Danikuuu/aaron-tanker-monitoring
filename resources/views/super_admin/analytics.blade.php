@@ -13,7 +13,7 @@
             <div class="flex rounded-lg border border-gray-300 overflow-hidden text-sm">
                 @foreach(['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly', 'yearly' => 'Yearly'] as $value => $label)
                 <button type="submit" name="period" value="{{ $value }}"
-                    class="px-4 py-2 transition
+                    class="px-4 py-2 transition cursor-pointer
                         {{ $period === $value
                             ? 'bg-primary text-white font-semibold'
                             : 'bg-white text-gray-600 hover:bg-gray-50' }}">
@@ -30,7 +30,7 @@
                   'premium'  => ['label' => 'Premium Arrived',  'color' => 'text-yellow-600'],
                   'unleaded' => ['label' => 'Unleaded Arrived', 'color' => 'text-blue-600'],
                   'methanol' => ['label' => 'Methanol Arrived', 'color' => 'text-purple-600']] as $type => $cfg)
-        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+        <div class="bg-white rounded-lg border border-gray-200 shadow-[0_0_10px_rgba(0,0,0,0.30)] p-6">
             <p class="font-bold text-lg mb-1">{{ $cfg['label'] }}</p>
             <p class="text-2xl font-bold {{ $cfg['color'] }}">
                 {{ number_format($arrivalTotals[$type] ?? 0, 2) }} L
@@ -45,7 +45,7 @@
                   'premium'  => ['label' => 'Premium Dispatched',  'color' => 'text-yellow-600'],
                   'unleaded' => ['label' => 'Unleaded Dispatched', 'color' => 'text-blue-600'],
                   'methanol' => ['label' => 'Methanol Used (Mix)', 'color' => 'text-purple-600']] as $type => $cfg)
-        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+        <div class="bg-white rounded-lg border border-gray-200 shadow-[0_0_10px_rgba(0,0,0,0.30)] p-6">
             <p class="font-bold text-lg mb-1">{{ $cfg['label'] }}</p>
             <p class="text-2xl font-bold {{ $cfg['color'] }}">
                 @if($type === 'methanol')

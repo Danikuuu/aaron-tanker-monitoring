@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Requests\Admin\FuelArrivalRequest;
+use App\Requests\Admin\FuelDepartureRequest;
 use App\Services\Admin\FuelSummaryService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -53,5 +56,33 @@ class FuelSummaryController extends Controller
     public function exportDeparturesPdf(Request $request)
     {
         return $this->fuelSummaryService->exportDeparturesPdf($request->query());
+    }
+
+    /**
+     * Update a fuel arrival record.
+     */
+    public function updateArrival(FuelArrivalRequest $request, int $id): RedirectResponse
+    {
+        $this->fuelSummaryService->updateArrival($id, $request->validated());
+
+        $route = Auth::user()->role === 'super_admin' ? 'super_admin.fuel-summary' : 'admin.fuel-summary';
+
+        return redirect()
+            ->route($route)
+            ->with('success', 'Fuel arrival updated successfully.');
+    }
+
+    /**
+     * Update a fuel departure record.
+     */
+    public function updateDeparture(FuelDepartureRequest $request, int $id): RedirectResponse
+    {
+        $this->fuelSummaryService->updateDeparture($id, $request->validated());
+
+        $route = Auth::user()->role === 'super_admin' ? 'super_admin.fuel-summary' : 'admin.fuel-summary';
+
+        return redirect()
+            ->route($route)
+            ->with('success', 'Fuel departure updated successfully.');
     }
 }

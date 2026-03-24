@@ -36,7 +36,7 @@ class OverviewRepository implements OverviewInterface
     {
         return DB::table('tanker_arrival_fuels')
             ->join('tanker_arrivals', 'tanker_arrivals.id', '=', 'tanker_arrival_fuels.tanker_arrival_id')
-            ->selectRaw("strftime('%Y-%m', tanker_arrivals.arrival_date) as month, fuel_type, SUM(liters) as total")
+            ->selectRaw("DATE_FORMAT(tanker_arrivals.arrival_date, '%Y-%m') as month, fuel_type, SUM(liters) as total")
             ->where('tanker_arrivals.arrival_date', '>=', now()->subMonths($months)->startOfMonth())
             ->groupBy('month', 'fuel_type')
             ->orderBy('month')

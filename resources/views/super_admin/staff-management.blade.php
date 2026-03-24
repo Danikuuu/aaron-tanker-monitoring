@@ -4,13 +4,32 @@
 @section('title', 'Staff Management')
 
 @section('content')
-<div class="bg-white rounded-lg shadow p-6" x-data="{ showModal: false }">
+<div class="bg-white rounded-lg shadow p-6" x-data="{
+    showModal: false,
+    confirmModal: false,
+    confirmAction: '',
+    confirmMethod: 'POST',
+    confirmTitle: '',
+    confirmMessage: '',
+    confirmBtnText: '',
+    confirmBtnClass: '',
+
+    openConfirm(action, method, title, message, btnText, btnClass) {
+        this.confirmAction   = action;
+        this.confirmMethod   = method;
+        this.confirmTitle    = title;
+        this.confirmMessage  = message;
+        this.confirmBtnText  = btnText;
+        this.confirmBtnClass = btnClass;
+        this.confirmModal    = true;
+    }
+}">
 
     {{-- Header --}}
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-semibold">Staff Management</h2>
         <button @click="showModal = true"
-                class="inline-flex items-center gap-2 bg-primary hover:bg-[#ff4040] text-white px-5 py-2 rounded-lg text-sm font-medium transition">
+                class="inline-flex cursor-pointer items-center gap-2 bg-primary hover:bg-[#ff4040] text-white px-5 py-2 rounded-lg text-sm font-medium transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
@@ -86,96 +105,98 @@
                         @endif
                     </td>
 
-                    {{-- Action Dropdown --}}
+                    {{-- Action Buttons --}}
                     <td class="px-4 py-3">
-                        <div class="relative inline-block text-left" x-data="{ open: false }">
-                            <button @click="open = !open" @click.outside="open = false"
-                                    type="button"
-                                    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition
-                                        @if($member->isBlocked())      bg-gray-500   hover:bg-gray-600
-                                        @elseif($member->isApproved()) bg-green-600  hover:bg-green-700
-                                        @else                          bg-yellow-500 hover:bg-yellow-600
-                                        @endif">
-                                @if($member->isBlocked())      Blocked
-                                @elseif($member->isApproved()) Approved
-                                @else                          Pending
-                                @endif
-                                <svg class="w-4 h-4 transition-transform duration-200"
-                                     :class="{ 'rotate-180': open }"
-                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                            </button>
+                        <div class="flex items-center gap-2">
 
-                            <div x-show="open"
-                                 x-transition:enter="transition ease-out duration-100"
-                                 x-transition:enter-start="opacity-0 scale-95"
-                                 x-transition:enter-end="opacity-100 scale-100"
-                                 x-transition:leave="transition ease-in duration-75"
-                                 x-transition:leave-start="opacity-100 scale-100"
-                                 x-transition:leave-end="opacity-0 scale-95"
-                                 class="absolute z-10 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
-                                 style="display: none;">
+                            @if($member->isPending())
+                                {{-- Pending: Approve button --}}
+                                <button type="button"
+                                        @click="openConfirm(
+                                            '{{ route('super_admin.staff.approve', $member->id) }}',
+                                            'POST',
+                                            'Approve Member',
+                                            'Are you sure you want to approve <strong>{{ addslashes($member->first_name . ' ' . $member->last_name) }}</strong>? They will be able to log in to their account.',
+                                            'Approve',
+                                            'bg-green-600 hover:bg-green-700 text-white'
+                                        )"
+                                        class="inline-flex cursor-pointer items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-green-100 text-green-700 hover:bg-green-200 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Approve
+                                </button>
 
-                                @if($member->isApproved())
-                                    <div class="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 cursor-not-allowed bg-gray-50">
-                                        <span class="w-2 h-2 rounded-full bg-green-300 inline-block"></span>
-                                        Approve
-                                    </div>
-                                @else
-                                    <form method="POST" action="{{ route('super_admin.staff.approve', $member->id) }}">
-                                        @csrf
-                                        <button type="submit"
-                                                class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition">
-                                            <span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
-                                            Approve
-                                        </button>
-                                    </form>
-                                @endif
+                                <button type="button"
+                                        @click="openConfirm(
+                                            '{{ route('super_admin.staff.block', $member->id) }}',
+                                            'POST',
+                                            'Block Member',
+                                            'Are you sure you want to block <strong>{{ addslashes($member->first_name . ' ' . $member->last_name) }}</strong>? They will no longer be able to log in.',
+                                            'Block',
+                                            'bg-red-600 hover:bg-red-700 text-white'
+                                        )"
+                                        class="inline-flex cursor-pointer items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                    </svg>
+                                    Block
+                                </button>
 
-                                @if($member->isBlocked())
-                                    <div class="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 cursor-not-allowed bg-gray-50">
-                                        <span class="w-2 h-2 rounded-full bg-red-300 inline-block"></span>
-                                        Block
-                                    </div>
-                                @else
-                                    <form method="POST" action="{{ route('super_admin.staff.block', $member->id) }}">
-                                        @csrf
-                                        <button type="submit"
-                                                class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition">
-                                            <span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
-                                            Block
-                                        </button>
-                                    </form>
-                                @endif
+                            @elseif($member->isApproved())
+                                {{-- Approved: Block button --}}
+                                <button type="button"
+                                        @click="openConfirm(
+                                            '{{ route('super_admin.staff.block', $member->id) }}',
+                                            'POST',
+                                            'Block Member',
+                                            'Are you sure you want to block <strong>{{ addslashes($member->first_name . ' ' . $member->last_name) }}</strong>? They will no longer be able to log in.',
+                                            'Block',
+                                            'bg-red-600 hover:bg-red-700 text-white'
+                                        )"
+                                        class="inline-flex cursor-pointer items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                    </svg>
+                                    Block
+                                </button>
 
-                                @if($member->isBlocked())
-                                    <form method="POST" action="{{ route('super_admin.staff.unblock', $member->id) }}">
-                                        @csrf
-                                        <button type="submit"
-                                                class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
-                                            <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>
-                                            Unblock
-                                        </button>
-                                    </form>
+                            @elseif($member->isBlocked())
+                                {{-- Blocked: Unblock + Delete buttons --}}
+                                <button type="button"
+                                        @click="openConfirm(
+                                            '{{ route('super_admin.staff.unblock', $member->id) }}',
+                                            'POST',
+                                            'Unblock Member',
+                                            'Are you sure you want to unblock <strong>{{ addslashes($member->first_name . ' ' . $member->last_name) }}</strong>? They will be able to log in again.',
+                                            'Unblock',
+                                            'bg-blue-600 hover:bg-blue-700 text-white'
+                                        )"
+                                        class="inline-flex cursor-pointer items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+                                    </svg>
+                                    Unblock
+                                </button>
 
-                                    <div class="border-t border-gray-100"></div>
-                                    <form method="POST"
-                                          action="{{ route('super_admin.staff.delete', $member->id) }}"
-                                          onsubmit="return confirm('Permanently delete {{ $member->first_name }}?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                            Delete
-                                        </button>
-                                    </form>
-                                @endif
-                            </div>
+                                <button type="button"
+                                        @click="openConfirm(
+                                            '{{ route('super_admin.staff.delete', $member->id) }}',
+                                            'DELETE',
+                                            'Delete Member',
+                                            'Are you sure you want to <span class=\'font-semibold text-red-600\'>permanently delete</span> <strong>{{ addslashes($member->first_name . ' ' . $member->last_name) }}</strong>? This action cannot be undone.',
+                                            'Delete',
+                                            'bg-red-600 hover:bg-red-700 text-white'
+                                        )"
+                                        class="inline-flex cursor-pointer items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    Delete
+                                </button>
+                            @endif
+
                         </div>
                     </td>
                 </tr>
@@ -232,6 +253,66 @@
         @endif
     </div>
     @endif
+
+
+    {{-- ── Confirmation Modal ──────────────────────────────────────────────── --}}
+    <div x-show="confirmModal"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+         style="display: none;">
+
+        <div @click.outside="confirmModal = false"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="bg-white rounded-xl shadow-xl w-full max-w-sm">
+
+            {{-- Modal Header --}}
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-800" x-text="confirmTitle"></h3>
+                <button @click="confirmModal = false"
+                        class="text-gray-400 cursor-pointer hover:text-gray-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Modal Body --}}
+            <div class="px-6 py-5">
+                <p class="text-sm text-gray-600 leading-relaxed" x-html="confirmMessage"></p>
+            </div>
+
+            {{-- Modal Footer --}}
+            <div class="flex gap-3 px-6 pb-5">
+                <button type="button"
+                        @click="confirmModal = false"
+                        class="flex-1 px-4 cursor-pointer py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+                    Cancel
+                </button>
+
+                <form id="confirmForm" method="POST" x-bind:action="confirmAction" class="flex-1">
+                    @csrf
+                    <template x-if="confirmMethod === 'DELETE'">
+                        <input type="hidden" name="_method" value="DELETE">
+                    </template>
+                    <button type="submit"
+                            :class="confirmBtnClass"
+                            class="w-full px-4 cursor-pointer py-2 rounded-lg text-sm font-medium transition"
+                            x-text="confirmBtnText">
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 
 
     {{-- ── Add User Modal ─────────────────────────────────────────────────── --}}
@@ -364,16 +445,7 @@
 {{-- Re-open modal on validation error --}}
 @if($errors->any())
 <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.store('modal', { open: true });
-    });
-</script>
-<style>
-    [x-data] { }
-</style>
-<script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Find the root alpine component and open the modal
         const root = document.querySelector('[x-data]');
         if (root && root._x_dataStack) {
             root._x_dataStack[0].showModal = true;
@@ -381,15 +453,5 @@
     });
 </script>
 @endif
-<script>
-    const fuelForm = document.getElementById('fuelForm');
-    const submitBtn = fuelForm.querySelector('button[type="submit"]');
-
-    fuelForm.addEventListener('submit', function() {
-        // Disable the button immediately to prevent multiple clicks
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'Submitting...'; // Optional: give user feedback
-    });
-</script>
 
 @endsection

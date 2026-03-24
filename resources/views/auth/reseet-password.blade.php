@@ -14,7 +14,7 @@
                 d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
     </div>
-    <h2 class="text-xl font-semibold text-gray-800">Reset Password</h2>
+    <h2 class="text-xl font-semibold text-gray-800 ">Reset Password</h2>
     <p class="text-gray-500 text-sm mt-2">
         Enter and confirm your new password below.
     </p>
@@ -53,13 +53,13 @@
     </div>
 
     <button type="submit"
-        class="w-full bg-primary hover:bg-darkred text-white py-3 rounded-full font-semibold transition">
+        class="w-full bg-primary hover:bg-darkred text-white py-3 rounded-full font-semibold transition cursor-pointer">
         Save New Password
     </button>
 
     <p class="text-center text-sm mt-4">
         Remember your password?
-        <a href="{{ route('login') }}" class="text-primary font-medium hover:underline">Back to Login</a>
+        <a href="{{ route('login') }}" class="text-primary font-medium hover:underline cursor-pointer">Back to Login</a>
     </p>
 </form>
 
