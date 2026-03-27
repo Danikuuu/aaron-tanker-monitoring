@@ -14,7 +14,6 @@
     <table>
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Tanker No.</th>
                 <th>Arrival Date</th>
                 <th>Recorded By</th>
@@ -25,7 +24,6 @@
         <tbody>
         @foreach($rows as $row)
             <tr>
-                <td>{{ $row->id }}</td>
                 <td>{{ $row->tanker_number }}</td>
                 <td>{{ \Carbon\Carbon::parse($row->arrival_date)->format('m/d/Y') }}</td>
                 <td>{{ $row->recorded_by }}</td>

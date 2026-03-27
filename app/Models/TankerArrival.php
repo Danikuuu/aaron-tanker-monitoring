@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TankerArrival extends Model
 {
-    protected $fillable = ['recorded_by', 'tanker_number', 'arrival_date'];
+    protected $fillable = ['recorded_by', 'tanker_number', 'driver', 'arrival_date'];
 
     protected function casts(): array
     {

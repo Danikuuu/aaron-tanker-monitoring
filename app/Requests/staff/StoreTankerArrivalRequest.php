@@ -15,7 +15,7 @@ class StoreTankerArrivalRequest extends FormRequest
     {
         return [
             'tanker_number'  => 'required|string|max:20',
-            'driver'         => 'required|string|max:25',
+            'driver'         => 'nullable|string|max:25',
             'departure_date' => 'required|date',
 
             'fuel_type'      => 'required|array',

@@ -398,7 +398,7 @@
 </footer>
 
 <script>
-    const mixedFuels = ['diesel', 'premium', 'unleaded'];
+    const mixedFuels = ['premium', 'unleaded'];
     const rows       = document.querySelectorAll('.fuel-row');
 
     function updateAllSelects() {

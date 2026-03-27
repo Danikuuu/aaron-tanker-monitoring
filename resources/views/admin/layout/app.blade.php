@@ -596,7 +596,7 @@
             searchDropdown.classList.add('open');
 
             searchTimer = setTimeout(() => {
-                fetch(`{{ route('search') }}?q=${encodeURIComponent(q)}`, {
+                fetch(`{{ route('admin.search') }}?q=${encodeURIComponent(q)}`, {
                     headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                 })
                 .then(r => r.json())

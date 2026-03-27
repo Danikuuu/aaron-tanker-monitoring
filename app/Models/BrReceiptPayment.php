@@ -43,6 +43,11 @@ class BrReceiptPayment extends Model
         return $this->belongsTo(User::class, 'recorded_by');
     }
 
+    public function installments()
+    {
+        return $this->hasMany(BrReceiptPaymentInstallment::class, 'br_receipt_payment_id')->orderBy('payment_date');
+    }
+
     // ── Computed helpers ───────────────────────────────────────────────────
     public function getAmountPaidAttribute(): float
     {

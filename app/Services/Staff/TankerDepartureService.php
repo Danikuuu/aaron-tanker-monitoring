@@ -2,13 +2,17 @@
 
 namespace App\Services\Staff;
 
+use App\Mail\TankerActivityRecorded;
 use App\Models\AuditLog;
 use App\Models\FuelStock;
 use App\Models\TankerDeparture;
+use App\Models\User;
 use App\Repositories\Staff\TankerDepartureRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class TankerDepartureService
 {
@@ -37,6 +41,11 @@ class TankerDepartureService
 
                 if (!$fuelType || !$liters) {
                     continue;
+                }
+
+                // Diesel departures should always be pure diesel.
+                if ($fuelType === 'diesel') {
+                    $methanolLiters = 0;
                 }
 
                 $pureLiters = $liters - $methanolLiters;
@@ -107,6 +116,45 @@ class TankerDepartureService
                     'fuel_breakdown'=> $fuelSummary
                 ]
             );
+
+            DB::afterCommit(function () use ($departure, $fuelSummary) {
+                $adminEmails = User::query()
+                    ->whereIn('role', ['admin', 'super_admin'])
+                    ->whereNotNull('email')
+                    ->pluck('email')
+                    ->unique()
+                    ->values()
+                    ->all();
+
+                if (empty($adminEmails)) {
+                    return;
+                }
+
+                $recordedBy = trim((Auth::user()?->first_name ?? '') . ' ' . (Auth::user()?->last_name ?? ''));
+                $recordedBy = $recordedBy !== '' ? $recordedBy : (Auth::user()?->email ?? 'Staff');
+
+                $emailFuelBreakdown = collect($fuelSummary)->map(function (array $fuel) {
+                    return [
+                        'fuel_type' => $fuel['fuel_type'] ?? '',
+                        'liters' => $fuel['total_liters'] ?? 0,
+                    ];
+                })->values()->all();
+
+                try {
+                    Mail::to($adminEmails)->send(new TankerActivityRecorded(
+                        activityType: 'departure',
+                        tankerNumber: (string) $departure->tanker_number,
+                        recordedDate: optional($departure->departure_date)->format('M d, Y') ?? (string) $departure->departure_date,
+                        recordedBy: $recordedBy,
+                        fuelBreakdown: $emailFuelBreakdown
+                    ));
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to send tanker departure admin notification email.', [
+                        'tanker_departure_id' => $departure->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            });
 
             return $departure;
         });

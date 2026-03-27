@@ -1,6 +1,6 @@
 @extends('super_admin.layout.app')
 
-@section('title', 'BR Receipt Builder')
+@section('title', 'DR Receipt Builder')
 
 @section('content')
 
@@ -57,7 +57,7 @@
 
 {{-- ═══════════════════════════ STEP 1 — SELECT DEPARTURE ═══════════════════════════ --}}
 <div class="mb-6">
-    <h2 class="text-xl font-bold mb-1">BR Receipt Builder</h2>
+    <h2 class="text-xl font-bold mb-1">DR Receipt Builder</h2>
     <p class="text-sm text-gray-500 mb-4">Select a tanker departure to pre-fill the form, complete any remaining fields, then export as PDF.</p>
 
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
@@ -606,8 +606,8 @@
         // ── Max value validation ──────────────────────────────────────────────
         currentFuels.forEach((fuel, idx) => {
             const price = parseFloat(document.getElementById(`price_${idx}`)?.value) || 0;
-            if (price > 100) {
-                errors.push(`${fuel.fuel_type.toUpperCase()}: ₱${price.toFixed(2)} exceeds the maximum allowed unit price of ₱100.00`);
+            if (price > 300) {
+                errors.push(`${fuel.fuel_type.toUpperCase()}: ₱${price.toFixed(2)} exceeds the maximum allowed unit price of ₱300.00`);
             }
         });
 
@@ -646,6 +646,12 @@
         const padRows = Math.max(0, 5 - currentFuels.length);
         for (let i = 0; i < padRows; i++) {
             rowsHtml += `<tr><td class="r-cell">&nbsp;</td><td class="r-cell"></td><td class="r-cell"></td><td class="r-cell"></td><td class="r-cell"></td><td class="r-cell"></td></tr>`;
+        }
+
+        if (downpayment > grossTotal) {
+            errors.push(`Downpayment: ₱${downpayment.toLocaleString('en', { minimumFractionDigits: 2 })} cannot be greater than total price of ₱${grossTotal.toLocaleString('en', { minimumFractionDigits: 2 })}.`);
+            showPriceError(errors);
+            return;
         }
 
         const balanceDue           = Math.max(0, grossTotal - downpayment);
@@ -702,7 +708,7 @@
             .then(data => {
                 const opt = {
                     margin:      [0, 0, 0, 0],
-                    filename:    `BR-Receipt-${receiptNo}.pdf`,
+                    filename:    `DR-Receipt-${receiptNo}.pdf`,
                     image:       { type: 'jpeg', quality: 0.98 },
                     html2canvas: { scale: 2, useCORS: true, letterRendering: true },
                     jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' },
@@ -759,6 +765,10 @@
             grandTotal          += amount;
             return { fuel_type: fuel.fuel_type, liters: totalLiters, unit_price: price, amount, remarks };
         });
+
+        if (downpayment > grandTotal) {
+            return Promise.reject(new Error('Downpayment cannot be greater than total price.'));
+        }
 
         const payload = {
             tanker_departure_id: currentDepartureId,
@@ -850,7 +860,7 @@
 
             const opt = {
                 margin:      [0, 0, 0, 0],
-                filename:    `BR-Receipt-${receipt.receipt_no}.pdf`,
+                filename:    `DR-Receipt-${receipt.receipt_no}.pdf`,
                 image:       { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true, letterRendering: true },
                 jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' },

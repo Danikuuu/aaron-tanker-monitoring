@@ -47,7 +47,7 @@ class BrReceiptPaymentRepository implements BrReceiptPaymentInterface
 
     public function findReceipt(int $id): BrReceipt
     {
-        return BrReceipt::with(['departure.fuels', 'fuels', 'payment'])
+        return BrReceipt::with(['departure.fuels', 'fuels', 'payment.installments'])
             ->findOrFail($id);
     }
 

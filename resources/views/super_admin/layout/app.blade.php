@@ -278,7 +278,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                         </svg>
-                        <span class="text-sm xl:text-md">BR Receipt</span>
+                        <span class="text-sm xl:text-md">DR Receipt</span>
                     </a>
 
                     <a href="{{ route('super_admin.br-receipt-payments.index') }}"
@@ -657,7 +657,7 @@
             searchDropdown.classList.add('open');
 
             searchTimer = setTimeout(() => {
-                fetch(`{{ route('search') }}?q=${encodeURIComponent(q)}`, {
+                fetch(`{{ route('super_admin.search') }}?q=${encodeURIComponent(q)}`, {
                     headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                 })
                 .then(r => r.json())

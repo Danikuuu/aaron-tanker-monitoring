@@ -132,11 +132,12 @@
                 <tbody class="divide-y divide-gray-100">
                     @foreach($receipts as $receipt)
                         @php
-                            $payment  = $receipt->payment;
-                            $status   = $payment?->status ?? 'unpaid';
-                            $balance  = $payment?->remaining_balance ?? max(0, (float)$receipt->grand_total - (float)$receipt->downpayment);
+                            $payment   = $receipt->payment;
+                            $paid      = (float)($payment?->down_payment ?? $receipt->downpayment ?? 0) + (float)($payment?->final_payment ?? 0);
+                            $balance   = max(0, (float)$receipt->grand_total - $paid);
+                            $status    = $paid <= 0 ? 'unpaid' : ($balance > 0 ? 'partial' : 'paid');
                             $isOverdue = $payment?->is_overdue ?? false;
-                            $dueDate  = $payment?->due_date;
+                            $dueDate   = $payment?->due_date;
                         @endphp
                         <tr class="hover:bg-gray-50 transition {{ $isOverdue ? 'bg-red-50/40' : '' }}">
                             <td class="px-4 py-3 font-mono font-semibold text-gray-800">

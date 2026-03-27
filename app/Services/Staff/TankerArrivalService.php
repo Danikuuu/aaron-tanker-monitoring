@@ -2,12 +2,16 @@
 
 namespace App\Services\Staff;
 
+use App\Mail\TankerActivityRecorded;
 use App\Models\AuditLog;
 use App\Models\FuelStock;
 use App\Models\TankerArrival;
+use App\Models\User;
 use App\Repositories\Staff\TankerArrivalRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class TankerArrivalService
 {
@@ -22,7 +26,7 @@ class TankerArrivalService
             $arrival = $this->repository->create([
                 'recorded_by'   => Auth::id(),
                 'tanker_number' => $validated['tanker_number'],
-                'driver'        => $validated['driver'],
+                'driver'        => $validated['driver'] ?? null,
                 'arrival_date'  => $validated['departure_date'],
             ]);
 
@@ -78,6 +82,38 @@ class TankerArrivalService
                     'fuel_breakdown' => $fuelSummary,
                 ]
             );
+
+            DB::afterCommit(function () use ($arrival, $fuelSummary) {
+                $adminEmails = User::query()
+                    ->whereIn('role', ['admin', 'super_admin'])
+                    ->whereNotNull('email')
+                    ->pluck('email')
+                    ->unique()
+                    ->values()
+                    ->all();
+
+                if (empty($adminEmails)) {
+                    return;
+                }
+
+                $recordedBy = trim((Auth::user()?->first_name ?? '') . ' ' . (Auth::user()?->last_name ?? ''));
+                $recordedBy = $recordedBy !== '' ? $recordedBy : (Auth::user()?->email ?? 'Staff');
+
+                try {
+                    Mail::to($adminEmails)->send(new TankerActivityRecorded(
+                        activityType: 'arrival',
+                        tankerNumber: (string) $arrival->tanker_number,
+                        recordedDate: optional($arrival->arrival_date)->format('M d, Y') ?? (string) $arrival->arrival_date,
+                        recordedBy: $recordedBy,
+                        fuelBreakdown: $fuelSummary
+                    ));
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to send tanker arrival admin notification email.', [
+                        'tanker_arrival_id' => $arrival->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            });
 
             return $arrival;
         });

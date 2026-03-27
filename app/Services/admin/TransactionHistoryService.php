@@ -2,8 +2,10 @@
 
 namespace App\Services\Admin;
 
+use Carbon\Carbon;
 use App\Repositories\Admin\TransactionHistoryInterface;
 use App\Requests\Admin\TransactionHistoryRequest;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TransactionHistoryService
@@ -41,14 +43,24 @@ class TransactionHistoryService
         );
 
         $filename = 'transactions_' . now()->format('Ymd_His') . '.csv';
-        $headers  = ['ID', 'Type', 'Tanker No.', 'Driver', 'Date', 'Recorded By', 'Fuel Type', 'Liters', 'Methanol %', 'Methanol L'];
+        $headers  = ['Type', 'Tanker No.', 'Driver', 'Date', 'Recorded By', 'Fuel Type', 'Liters', 'Methanol %', 'Methanol L'];
 
         return response()->stream(
             function () use ($headers, $rows) {
                 $handle = fopen('php://output', 'w');
                 fputcsv($handle, $headers);
                 foreach ($rows as $row) {
-                    fputcsv($handle, (array) $row);
+                    fputcsv($handle, [
+                        ucfirst((string) $row->type),
+                        $row->tanker_number,
+                        $row->driver ?? '',
+                        $row->transaction_date ? Carbon::parse($row->transaction_date)->format('m/d/Y') : '',
+                        $row->recorded_by,
+                        $row->fuel_type ?? '',
+                        isset($row->liters) ? number_format((float) $row->liters, 2, '.', '') : '',
+                        $row->methanol_percent ?? '',
+                        $row->methanol_liters ?? '',
+                    ]);
                 }
                 fclose($handle);
             },
@@ -80,7 +92,8 @@ class TransactionHistoryService
             dateTo:   $request->dateTo(),
         );
 
-        $pdfView = view('admin.transaction-history-pdf', ['rows' => $rows])->render();
+        $viewPrefix = Auth::user()?->role === 'super_admin' ? 'super_admin' : 'admin';
+        $pdfView = view("{$viewPrefix}.transaction-history-pdf", ['rows' => $rows])->render();
 
         // Use dompdf to render PDF
         $dompdf = new \Dompdf\Dompdf();

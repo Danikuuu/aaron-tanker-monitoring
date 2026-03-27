@@ -12,12 +12,14 @@ class StoreBrReceiptPaymentRequest extends FormRequest
     {
         return [
             'br_receipt_id'      => 'required|exists:br_receipts,id',
-            'client_name'        => 'nullable|string|max:20',
+            'client_name'        => 'nullable|string|max:30',
             'total_amount'       => 'required|numeric|min:0|max:3000000',
             'down_payment'       => 'nullable|numeric|min:0|max:1000000',
             'down_payment_date'  => 'nullable|date',
             'final_payment'      => 'nullable|numeric|min:0|max:5000000',
             'final_payment_date' => 'nullable|date',
+            'payment_amount'     => 'nullable|numeric|min:0.01|max:5000000',
+            'payment_date'       => 'nullable|date',
             'due_date'           => 'nullable|date',
             'notes'              => 'nullable|string|max:50',
         ];
@@ -37,6 +39,9 @@ class StoreBrReceiptPaymentRequest extends FormRequest
             'final_payment.min'        => 'Final payment cannot be negative.',
             'down_payment_date.date'   => 'Down payment date must be a valid date.',
             'final_payment_date.date'  => 'Final payment date must be a valid date.',
+            'payment_amount.max'       => 'Payment amount cannot exceed ₱5000000.',
+            'payment_amount.min'       => 'Payment amount must be greater than zero.',
+            'payment_date.date'        => 'Payment date must be a valid date.',
             'due_date.date'            => 'Due date must be a valid date.',
         ];
     }
@@ -47,6 +52,7 @@ class StoreBrReceiptPaymentRequest extends FormRequest
             $total      = (float) $this->input('total_amount', 0);
             $down       = (float) $this->input('down_payment', 0);
             $final      = (float) $this->input('final_payment', 0);
+            $newPayment = (float) $this->input('payment_amount', 0);
             $totalPaid  = $down + $final;
 
             if ($down > $total) {
@@ -59,6 +65,10 @@ class StoreBrReceiptPaymentRequest extends FormRequest
 
             if ($totalPaid > $total) {
                 $validator->errors()->add('final_payment', 'Combined down payment and final payment cannot exceed the total amount (₱' . number_format($total, 2) . ').');
+            }
+
+            if ($newPayment > 0 && ($totalPaid + $newPayment) > $total) {
+                $validator->errors()->add('payment_amount', 'Payment amount exceeds the remaining balance.');
             }
         });
     }

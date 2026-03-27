@@ -154,6 +154,9 @@ Route::middleware([RoleMiddleware::class . ':admin'])->prefix('admin')->group(fu
 
     Route::get('/admin/notifications', [NotificationController::class, 'index'])
     ->name('admin.notifications');
+
+    // Search
+    Route::get('/search', [SearchController::class, 'index'])->name('admin.search');
     
 });
 
@@ -239,7 +242,7 @@ Route::middleware([RoleMiddleware::class . ':super_admin'])->prefix('super_admin
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('super_admin.audit-logs');
 
     // Search
-    Route::get('/search', [SearchController::class, 'index'])->name('search');
+    Route::get('/search', [SearchController::class, 'index'])->name('super_admin.search');
 
     
 });

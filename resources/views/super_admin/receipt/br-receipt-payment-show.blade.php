@@ -6,11 +6,12 @@
 
 @php
     $payment    = $receipt->payment;
-    $status     = $payment?->status ?? 'unpaid';
+    $installments = $payment?->installments ?? collect();
     $paid       = (float)($payment?->down_payment ?? $receipt->downpayment ?? 0) + (float)($payment?->final_payment ?? 0);
     $balance    = max(0, (float)$receipt->grand_total - $paid);
     $pct        = $receipt->grand_total > 0 ? round(($paid / $receipt->grand_total) * 100) : 0;
     $isOverdue  = $payment?->is_overdue ?? false;
+    $status     = $paid <= 0 ? 'unpaid' : ($balance > 0 ? 'partial' : 'paid');
 
     $badgeClass = match($status) {
         'paid'    => 'bg-green-100 text-green-700 border-green-200',
@@ -152,7 +153,9 @@
                     <div class="bg-yellow-50 border border-yellow-100 rounded-lg p-3">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-xs font-semibold text-yellow-700 uppercase tracking-wide">Down Payment</p>
+                                <p class="text-xs font-semibold text-yellow-700 uppercase tracking-wide">
+                                    {{ $payment->final_payment > 0 ? 'Down Payment' : 'Partial Payment' }}
+                                </p>
                                 <p class="text-lg font-black font-mono text-yellow-800">₱ {{ number_format($payment->down_payment, 2) }}</p>
                                 @php $dpPct = $receipt->grand_total > 0 ? round(($payment->down_payment / $receipt->grand_total) * 100, 1) : 0; @endphp
                                 <p class="text-xs text-yellow-600 mt-0.5">{{ $dpPct }}% of total</p>
@@ -168,25 +171,27 @@
                 </div>
                 @endif
 
-                @if($payment->final_payment > 0)
+                @foreach($installments as $idx => $installment)
                 <div class="relative mb-5">
                     <div class="absolute -left-4 top-1 w-3 h-3 rounded-full bg-green-500 border-2 border-white shadow"></div>
                     <div class="bg-green-50 border border-green-100 rounded-lg p-3">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-xs font-semibold text-green-700 uppercase tracking-wide">Final Payment</p>
-                                <p class="text-lg font-black font-mono text-green-800">₱ {{ number_format($payment->final_payment, 2) }}</p>
+                                <p class="text-xs font-semibold text-green-700 uppercase tracking-wide">
+                                    Payment #{{ $idx + 1 }}
+                                </p>
+                                <p class="text-lg font-black font-mono text-green-800">₱ {{ number_format($installment->amount, 2) }}</p>
                             </div>
                             <div class="text-right">
                                 <p class="text-xs text-gray-400 font-medium">Date Paid</p>
                                 <p class="text-sm font-semibold text-gray-700">
-                                    {{ $payment->final_payment_date?->format('m/d/Y') ?? '—' }}
+                                    {{ $installment->payment_date?->format('m/d/Y') ?? '—' }}
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
-                @endif
+                @endforeach
 
                 @if($payment->due_date && $status !== 'paid')
                 <div class="relative">
@@ -213,7 +218,7 @@
                 </div>
                 @endif
 
-                @if(!$payment->down_payment && !$payment->final_payment)
+                @if(!$payment->down_payment && $installments->isEmpty())
                 <p class="text-sm text-gray-400 italic">No payments recorded yet.</p>
                 @endif
             </div>
@@ -327,24 +332,24 @@
 
                 <hr class="border-gray-100">
 
-                {{-- Final Payment --}}
+                {{-- Additional payment (dynamic installments) --}}
                 <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Final Payment (₱)</label>
-                    <input type="number" name="final_payment" step="0.01" min="0"
-                           max="{{ $receipt->grand_total }}"
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Payment (₱)</label>
+                    <input type="number" name="payment_amount" step="0.01" min="0.01"
+                           max="{{ $balance > 0 ? $balance : 0 }}"
                            {{ $isReadOnly ? 'readonly' : '' }}
-                           value="{{ old('final_payment', $payment?->final_payment) }}"
+                           value="{{ old('payment_amount') }}"
                            placeholder="0.00"
                            class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5757]
                                   {{ $isReadOnly ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed' : 'border-gray-300' }}
-                                  @error('final_payment') border-red-400 @enderror">
-                    @error('final_payment') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                                  @error('payment_amount') border-red-400 @enderror">
+                    @error('payment_amount') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Final Payment Date</label>
-                    <input type="date" name="final_payment_date"
-                        {{ $isReadOnly ? 'readonly' : '' }} readonly
-                        value="{{ old('final_payment_date', $payment?->final_payment_date?->format('Y-m-d') ?? now()->format('Y-m-d')) }}"
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Payment Date</label>
+                    <input type="date" name="payment_date"
+                        {{ $isReadOnly ? 'readonly' : '' }}
+                        value="{{ old('payment_date', now()->format('Y-m-d')) }}"
                         class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5757]
                                 {{ $isReadOnly ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed' : 'border-gray-300' }}">
                 </div>
@@ -410,8 +415,8 @@
 
 <script>
     const grandTotal  = {{ (float) $receipt->grand_total }};
-    const downInput   = document.querySelector('[name="down_payment"]');
-    const finalInput  = document.querySelector('[name="final_payment"]');
+    const basePaid    = {{ (float) $paid }};
+    const paymentInput = document.querySelector('[name="payment_amount"]');
     const livePaid    = document.getElementById('liveAmountPaid');
     const liveBalance = document.getElementById('liveBalance');
 
@@ -420,9 +425,8 @@
     }
 
     function updatePreview() {
-        const down    = parseFloat(downInput?.value)  || 0;
-        const final   = parseFloat(finalInput?.value) || 0;
-        const paid    = down + final;
+        const newPayment = parseFloat(paymentInput?.value) || 0;
+        const paid    = basePaid + newPayment;
         const balance = Math.max(0, grandTotal - paid);
 
         if (livePaid)    livePaid.textContent    = fmt(paid);
@@ -432,8 +436,7 @@
         }
     }
 
-    downInput?.addEventListener('input', updatePreview);
-    finalInput?.addEventListener('input', updatePreview);
+    paymentInput?.addEventListener('input', updatePreview);
     updatePreview();
 
     // Prevent double submit

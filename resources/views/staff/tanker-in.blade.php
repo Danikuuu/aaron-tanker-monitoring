@@ -131,9 +131,9 @@
                                required class="ti-input">
                     </div>
                     <div>
-                        <label class="ti-label">Driver <span class="req">*</span></label>
-                        <input type="text" name="driver" placeholder="Driver name"
-                               required class="ti-input">
+                        <label class="ti-label">Driver</label>
+                        <input type="text" name="driver" placeholder="Driver name (optional)"
+                               class="ti-input">
                     </div>
                     <div class="ti-col-2">
                         <label class="ti-label">Arrival Date <span class="req">*</span></label>

@@ -28,7 +28,7 @@ class BrReceiptService
     public function generateReceiptNumber(): string
     {
         $year = date('y'); // 2-digit year (e.g., "25" for 2025)
-        $prefix = "BR-{$year}";
+        $prefix = "DR-{$year}";
 
         // Get the latest receipt number for this year
         $latest = BrReceipt::where('receipt_no', 'LIKE', "{$prefix}%")
@@ -52,6 +52,10 @@ class BrReceiptService
     public function createReceipt(array $data): BrReceipt
     {
         return DB::transaction(function () use ($data) {
+            if ((float) ($data['downpayment'] ?? 0) > (float) ($data['grand_total'] ?? 0)) {
+                throw new \InvalidArgumentException('Downpayment cannot be greater than the total price.');
+            }
+
             // Auto-generate receipt number if not provided
             if (empty($data['receipt_no'])) {
                 $data['receipt_no'] = $this->generateReceiptNumber();

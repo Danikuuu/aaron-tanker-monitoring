@@ -21,7 +21,13 @@ class FuelSummaryController extends Controller
      */
     public function index(Request $request)
     {
-        $data = $this->fuelSummaryService->getSummaryData($request->query());
+        $filters = [
+            'search'    => trim((string) $request->query('search', '')),
+            'date_from' => (string) $request->query('date_from', ''),
+            'date_to'   => (string) $request->query('date_to', ''),
+        ];
+
+        $data = $this->fuelSummaryService->getSummaryData($filters);
 
         $user = Auth::user();
 

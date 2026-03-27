@@ -50,4 +50,19 @@ class StoreBrReceiptRequest extends FormRequest
             'downpayment.min'        => 'Downpayment cannot be negative.',
         ];
     }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $grandTotal = (float) $this->input('grand_total', 0);
+            $downpayment = (float) $this->input('downpayment', 0);
+
+            if ($downpayment > $grandTotal) {
+                $validator->errors()->add(
+                    'downpayment',
+                    'Downpayment cannot be greater than the total price.'
+                );
+            }
+        });
+    }
 }

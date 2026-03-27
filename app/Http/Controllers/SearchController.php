@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 class SearchController extends Controller
 {
@@ -73,7 +74,7 @@ class SearchController extends Controller
                     'label'    => 'BR Receipt',
                     'title'    => $r->receipt_no,
                     'subtitle' => 'Delivered to: ' . ($r->delivered_to ?? '—'),
-                    'url'      => $this->roleRoute('br-receipt'),
+                    'url'      => $this->roleRoute('br-receipt', 'transaction-history'),
                     'icon'     => 'receipt',
                 ];
             });
@@ -92,7 +93,7 @@ class SearchController extends Controller
                     'label'    => ucfirst($u->role),
                     'title'    => $u->first_name . ' ' . $u->last_name,
                     'subtitle' => $u->email . ' · ' . ucfirst($u->status),
-                    'url'      => $this->roleRoute('staff-management'),
+                    'url'      => $this->roleRoute('staff-management', 'overview'),
                     'icon'     => 'user',
                 ];
             });
@@ -119,9 +120,14 @@ class SearchController extends Controller
     }
 
     // Build the correct route prefix based on the logged-in user's role
-    private function roleRoute(string $page): string
+    private function roleRoute(string $page, string $fallback = 'overview'): string
     {
         $role = Auth::user()->role === 'super_admin' ? 'super_admin' : 'admin';
-        return route("{$role}.{$page}");
+        $targetRoute = "{$role}.{$page}";
+        if (Route::has($targetRoute)) {
+            return route($targetRoute);
+        }
+
+        return route("{$role}.{$fallback}");
     }
 }

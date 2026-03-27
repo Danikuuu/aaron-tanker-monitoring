@@ -59,7 +59,7 @@ class BrReceiptPaymentService
             // Main Receipt Log
             AuditLog::record(
                 action: 'br_receipt_created',
-                description: "BR Receipt {$receipt->receipt_no} created.",
+                description: "DR Receipt {$receipt->receipt_no} created.",
                 model: $receipt,
                 meta: [
                     'receipt_no'   => $receipt->receipt_no,

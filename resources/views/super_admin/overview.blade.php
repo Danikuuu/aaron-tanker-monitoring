@@ -216,10 +216,10 @@
                                 @elseif(str_contains($log->action, 'departure')) bg-yellow-100 text-yellow-700
                                 @else bg-gray-100 text-gray-700
                                 @endif">
-                                {{ str_replace('_', ' ', ucfirst($log->action)) }}
+                                {{ str_ireplace('Br Receipt', 'DR Receipt', str_replace('_', ' ', ucfirst($log->action))) }}
                             </span>
                         </td>
-                        <td class="px-4 py-3 text-sm">{{ $log->description }}</td>
+                        <td class="px-4 py-3 text-sm">{{ str_ireplace('BR Receipt', 'DR Receipt', $log->description) }}</td>
                         <td class="px-4 py-3 text-sm text-gray-500">{{ $log->ip_address ?? '—' }}</td>
                     </tr>
                     @empty

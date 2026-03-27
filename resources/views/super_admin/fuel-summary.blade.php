@@ -75,9 +75,10 @@
                 <thead>
                     <tr class="bg-primary text-white">
                         <th class="px-4 py-3 text-left" style="width:15%">Tanker Number</th>
+                        <th class="px-4 py-3 text-left" style="width:13%">Driver</th>
                         <th class="px-4 py-3 text-left" style="width:14%">Arrival Date</th>
                         <th class="px-4 py-3 text-left" style="width:16%">Recorded By</th>
-                        <th class="px-4 py-3 text-left" style="width:40%">Fuels</th>
+                        <th class="px-4 py-3 text-left" style="width:27%">Fuels</th>
                         <th class="px-4 py-3 text-left rounded-tr-lg" style="width:15%">Action</th>
                     </tr>
                 </thead>
@@ -87,6 +88,7 @@
                         $arrivalData = json_encode([
                             'id'            => $arrival->id,
                             'tanker_number' => $arrival->tanker_number,
+                            'driver'        => $arrival->driver,
                             'arrival_date'  => $arrival->arrival_date->format('m/d/Y'),
                             'arrival_date_raw' => $arrival->arrival_date->format('Y-m-d'),
                             'recorded_by'   => trim(($arrival->recordedBy->first_name ?? '') . ' ' . ($arrival->recordedBy->last_name ?? '')),
@@ -100,6 +102,7 @@
                     @endphp
                     <tr class="border-b border-gray-200 hover:bg-gray-100 transition">
                         <td class="px-4 py-3 font-medium">{{ $arrival->tanker_number }}</td>
+                        <td class="px-4 py-3">{{ $arrival->driver ?: '—' }}</td>
                         <td class="px-4 py-3">{{ $arrival->arrival_date->format('m/d/Y') }}</td>
                         <td class="px-4 py-3 text-sm">
                             {{ $arrival->recordedBy->first_name ?? '—' }}
@@ -140,7 +143,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-gray-400">No arrivals recorded yet.</td>
+                        <td colspan="6" class="px-4 py-8 text-center text-gray-400">No arrivals recorded yet.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -344,6 +347,10 @@
                 <div class="bg-gray-50 rounded-xl p-4">
                     <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Arrival Date</p>
                     <p id="am-date" class="font-bold text-gray-800 text-sm">—</p>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Driver</p>
+                    <p id="am-driver" class="font-bold text-gray-800 text-sm">—</p>
                 </div>
                 <div class="bg-gray-50 rounded-xl p-4 col-span-2">
                     <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Recorded By</p>
@@ -579,6 +586,7 @@
     function openArrivalModal(data) {
         document.getElementById('am-tanker').textContent   = data.tanker_number || '—';
         document.getElementById('am-date').textContent     = data.arrival_date  || '—';
+        document.getElementById('am-driver').textContent   = data.driver        || '—';
         document.getElementById('am-recorded').textContent = data.recorded_by   || '—';
  
         const container = document.getElementById('am-fuels');

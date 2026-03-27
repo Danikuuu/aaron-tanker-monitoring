@@ -25,7 +25,7 @@
                 <option value="all" {{ $action === 'all' ? 'selected' : '' }}>All Actions</option>
                 @foreach($actions as $act)
                     <option value="{{ $act }}" {{ $action === $act ? 'selected' : '' }}>
-                        {{ ucwords(str_replace('_', ' ', $act)) }}
+                        {{ str_ireplace('Br Receipt', 'DR Receipt', ucwords(str_replace('_', ' ', $act))) }}
                     </option>
                 @endforeach
             </select>
@@ -127,12 +127,12 @@
                             $colorClass = $actionColors[$log->action] ?? 'bg-gray-100 text-gray-600';
                         @endphp
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $colorClass }}">
-                            {{ ucwords(str_replace('_', ' ', $log->action)) }}
+                            {{ str_ireplace('Br Receipt', 'DR Receipt', ucwords(str_replace('_', ' ', $log->action))) }}
                         </span>
                     </td>
 
                     <td class="px-4 py-3 text-gray-600 max-w-xs">
-                        <span class="line-clamp-2">{{ $log->description }}</span>
+                        <span class="line-clamp-2">{{ str_ireplace('BR Receipt', 'DR Receipt', $log->description) }}</span>
                     </td>
 
                     <td class="px-4 py-3 text-gray-500 font-mono text-xs">
@@ -157,7 +157,7 @@
                 <tr id="meta-{{ $log->id }}" class="hidden bg-indigo-50">
                     <td colspan="7" class="px-6 py-4">
                         <div class="text-xs font-semibold text-indigo-500 uppercase tracking-wide mb-2">
-                            Meta — {{ ucwords(str_replace('_', ' ', $log->action)) }}
+                            Meta — {{ str_ireplace('Br Receipt', 'DR Receipt', ucwords(str_replace('_', ' ', $log->action))) }}
                         </div>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                             @foreach($log->meta as $key => $value)

@@ -5,6 +5,8 @@ namespace App\Services\Admin;
 use App\Repositories\Admin\FuelSummaryInterface;
 use App\Models\TankerArrival;
 use App\Models\TankerDeparture;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FuelSummaryService
@@ -31,7 +33,7 @@ class FuelSummaryService
 
         return $this->streamCsv(
             'fuel_arrivals_' . now()->format('Ymd') . '.csv',
-            ['ID', 'Tanker No.', 'Arrival Date', 'Recorded By', 'Fuel Type', 'Liters'],
+            ['Tanker No.', 'Arrival Date', 'Recorded By', 'Fuel Type', 'Liters'],
             $rows
         );
     }
@@ -42,7 +44,7 @@ class FuelSummaryService
 
         return $this->streamCsv(
             'fuel_departures_' . now()->format('Ymd') . '.csv',
-            ['ID', 'Tanker No.', 'Driver', 'Departure Date', 'Recorded By', 'Fuel Type', 'Liters', 'Methanol %', 'Methanol L', 'Pure L'],
+            ['Tanker No.', 'Driver', 'Departure Date', 'Recorded By', 'Fuel Type', 'Liters', 'Methanol %', 'Methanol L', 'Pure L'],
             $rows
         );
     }
@@ -51,7 +53,8 @@ class FuelSummaryService
     {
         $rows = $this->fuelSummaryRepository->getArrivalExportRows($filters);
 
-        $pdfView = view('admin.fuel-summary-pdf-arrivals', ['rows' => $rows, 'filters' => $filters])->render();
+        $viewPrefix = Auth::user()?->role === 'super_admin' ? 'super_admin' : 'admin';
+        $pdfView = view("{$viewPrefix}.fuel-summary-pdf-arrivals", ['rows' => $rows, 'filters' => $filters])->render();
 
         $dompdf = new \Dompdf\Dompdf();
         $dompdf->loadHtml($pdfView);
@@ -70,7 +73,8 @@ class FuelSummaryService
     {
         $rows = $this->fuelSummaryRepository->getDepartureExportRows($filters);
 
-        $pdfView = view('admin.fuel-summary-pdf-departures', ['rows' => $rows, 'filters' => $filters])->render();
+        $viewPrefix = Auth::user()?->role === 'super_admin' ? 'super_admin' : 'admin';
+        $pdfView = view("{$viewPrefix}.fuel-summary-pdf-departures", ['rows' => $rows, 'filters' => $filters])->render();
 
         $dompdf = new \Dompdf\Dompdf();
         $dompdf->loadHtml($pdfView);
@@ -118,7 +122,30 @@ class FuelSummaryService
                 $handle = fopen('php://output', 'w');
                 fputcsv($handle, $headers);
                 foreach ($rows as $row) {
-                    fputcsv($handle, (array) $row);
+                    $isArrivalRow = property_exists($row, 'arrival_date');
+                    $dateField = $isArrivalRow ? ($row->arrival_date ?? null) : ($row->departure_date ?? null);
+
+                    $csvRow = $isArrivalRow
+                        ? [
+                            $row->tanker_number,
+                            $dateField ? Carbon::parse($dateField)->format('m/d/Y') : '',
+                            $row->recorded_by,
+                            ucfirst((string) $row->fuel_type),
+                            number_format((float) $row->liters, 2, '.', ''),
+                        ]
+                        : [
+                            $row->tanker_number,
+                            $row->driver ?? '',
+                            $dateField ? Carbon::parse($dateField)->format('m/d/Y') : '',
+                            $row->recorded_by,
+                            ucfirst((string) $row->fuel_type),
+                            number_format((float) $row->liters, 2, '.', ''),
+                            $row->methanol_percent ?? '',
+                            $row->methanol_liters ?? '',
+                            $row->pure_liters ?? '',
+                        ];
+
+                    fputcsv($handle, $csvRow);
                 }
                 fclose($handle);
             },

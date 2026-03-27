@@ -18,17 +18,25 @@ class FuelSummaryRepository implements FuelSummaryInterface
 
     public function getPaginatedArrivals(int $perPage = 10, array $filters = []): LengthAwarePaginator
     {
+        $search = trim((string) ($filters['search'] ?? ''));
+        $dateFrom = (string) ($filters['date_from'] ?? '');
+        $dateTo = (string) ($filters['date_to'] ?? '');
+
         return TankerArrival::with(['fuels', 'recordedBy'])
-            ->when(isset($filters['search']) && $filters['search'], fn($q) =>
+            ->when($search !== '', fn($q) =>
                 $q->where(fn($q2) =>
-                    $q2->where('tanker_number', 'like', "%{$filters['search']}%")
+                    $q2->where('tanker_number', 'like', "%{$search}%")
+                       ->orWhere('driver', 'like', "%{$search}%")
                        ->orWhereHas('recordedBy', fn($q3) =>
-                           $q3->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$filters['search']}%"])
+                           $q3->where('first_name', 'like', "%{$search}%")
+                              ->orWhere('last_name', 'like', "%{$search}%")
+                              ->orWhere('email', 'like', "%{$search}%")
+                              ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"])
                        )
                 )
             )
-            ->when(isset($filters['date_from']) && $filters['date_from'], fn($q) => $q->whereDate('arrival_date', '>=', $filters['date_from']))
-            ->when(isset($filters['date_to']) && $filters['date_to'], fn($q) => $q->whereDate('arrival_date', '<=', $filters['date_to']))
+            ->when($dateFrom !== '', fn($q) => $q->whereDate('arrival_date', '>=', $dateFrom))
+            ->when($dateTo !== '', fn($q) => $q->whereDate('arrival_date', '<=', $dateTo))
             ->latest()
             ->paginate($perPage, ['*'], 'arrival_page')
             ->withQueryString();
@@ -36,18 +44,25 @@ class FuelSummaryRepository implements FuelSummaryInterface
 
     public function getPaginatedDepartures(int $perPage = 10, array $filters = []): LengthAwarePaginator
     {
+        $search = trim((string) ($filters['search'] ?? ''));
+        $dateFrom = (string) ($filters['date_from'] ?? '');
+        $dateTo = (string) ($filters['date_to'] ?? '');
+
         return TankerDeparture::with(['fuels', 'recordedBy'])
-            ->when(isset($filters['search']) && $filters['search'], fn($q) =>
+            ->when($search !== '', fn($q) =>
                 $q->where(fn($q2) =>
-                    $q2->where('tanker_number', 'like', "%{$filters['search']}%")
-                       ->orWhere('driver', 'like', "%{$filters['search']}%")
+                    $q2->where('tanker_number', 'like', "%{$search}%")
+                       ->orWhere('driver', 'like', "%{$search}%")
                        ->orWhereHas('recordedBy', fn($q3) =>
-                           $q3->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$filters['search']}%"])
+                           $q3->where('first_name', 'like', "%{$search}%")
+                              ->orWhere('last_name', 'like', "%{$search}%")
+                              ->orWhere('email', 'like', "%{$search}%")
+                              ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"])
                        )
                 )
             )
-            ->when(isset($filters['date_from']) && $filters['date_from'], fn($q) => $q->whereDate('departure_date', '>=', $filters['date_from']))
-            ->when(isset($filters['date_to']) && $filters['date_to'], fn($q) => $q->whereDate('departure_date', '<=', $filters['date_to']))
+            ->when($dateFrom !== '', fn($q) => $q->whereDate('departure_date', '>=', $dateFrom))
+            ->when($dateTo !== '', fn($q) => $q->whereDate('departure_date', '<=', $dateTo))
             ->latest()
             ->paginate($perPage, ['*'], 'departure_page')
             ->withQueryString();
@@ -170,8 +185,8 @@ class FuelSummaryRepository implements FuelSummaryInterface
                     ->where('id', $fuelData['id'])
                     ->update([
                         'liters'           => $fuelData['liters'],
-                        'methanol_liters'  => $fuelData['methanol_liters']  ?? null,
-                        'methanol_percent' => $fuelData['methanol_percent'] ?? null,
+                        'methanol_liters'  => $fuelData['methanol_liters']  ?? 0,
+                        'methanol_percent' => $fuelData['methanol_percent'] ?? 0,
                     ]);
             }
 

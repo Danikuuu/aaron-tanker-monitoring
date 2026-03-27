@@ -14,7 +14,6 @@
     <table>
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Type</th>
                 <th>Tanker No.</th>
                 <th>Driver</th>
@@ -29,7 +28,6 @@
         <tbody>
         @foreach($rows as $row)
             <tr>
-                <td>{{ $row->id }}</td>
                 <td>{{ ucfirst($row->type) }}</td>
                 <td>{{ $row->tanker_number }}</td>
                 <td>{{ $row->driver ?? '—' }}</td>
